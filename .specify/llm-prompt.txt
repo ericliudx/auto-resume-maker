@@ -61,6 +61,7 @@ Add `patch-notes.md` when you change responsibilities or API shapes, or want dur
 - Run the project locally and verify `spec.md` behaviors
 - Run whatever build/test commands exist (don’t invent commands; if missing, add TODOs to architecture docs)
 - Cleanup dead code/temp files/stale links
+- Cleanup this `.specify/llm-prompt.txt` (remove or replace any feature-specific placeholders before finishing)
 
 When done and verified:
 
