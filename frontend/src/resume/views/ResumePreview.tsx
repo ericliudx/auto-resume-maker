@@ -18,6 +18,10 @@ export function ResumePreview({
   if (mode === 'print') {
     return (
       <ResumeScope className="printRoot">
+        <div className="printHelp">
+          To remove the tiny URL/date text in the PDF, disable browser print headers/footers (Chrome:
+          uncheck <code>Headers and footers</code> in the print dialog).
+        </div>
         {error ? <div className="printError">{error}</div> : null}
         {resume}
       </ResumeScope>
