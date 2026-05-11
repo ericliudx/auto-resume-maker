@@ -84,12 +84,16 @@ export function ResumeFitter({
     const rt = el.querySelector<HTMLElement>('.rt')
     if (!rt) return
 
-    const h = rt.getBoundingClientRect().height
+    // Use an untransformed measurement so the app preview's visual scaling doesn't
+    // change fit decisions vs print.
+    const h = rt.scrollHeight
     if (h <= maxHeightPx) return
 
     const next = nextTighterConfig(cfg)
     if (!next) return
-    setCfg(next)
+
+    const raf = window.requestAnimationFrame(() => setCfg(next))
+    return () => window.cancelAnimationFrame(raf)
   }, [cfg, fittedBank, target])
 
   return (

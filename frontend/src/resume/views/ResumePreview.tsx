@@ -4,18 +4,28 @@ import { ResumeScope } from '../ui/ResumeScope'
 import { ResumeCanvas, ResumeError, ResumeToolbar } from '../ui/ResumeShell'
 import { ContactEditor } from '../ui/ContactEditor'
 import { useState } from 'react'
+import type { BioBank } from '../data/bioTypes'
 
 export function ResumePreview({
   mode,
+  bankOverride,
 }: {
   mode: 'app' | 'print'
+  bankOverride?: BioBank | null
 }) {
   const { bank, contact, setContact, error, loading } = useResumeData()
   const [showContact, setShowContact] = useState<boolean>(false)
 
   const resume = (() => {
-    if (!bank) return null
-    return <ResumeFitter bank={bank} contact={contact} target={mode === 'print' ? 'print' : 'screen'} />
+    const effectiveBank = bankOverride ?? bank
+    if (!effectiveBank) return null
+    return (
+      <ResumeFitter
+        bank={effectiveBank}
+        contact={contact}
+        target={mode === 'print' ? 'print' : 'screen'}
+      />
+    )
   })()
 
   if (mode === 'print') {

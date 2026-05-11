@@ -3,6 +3,8 @@ import { fetchBioBank } from '../api/bioApi'
 import type { BioBank } from '../data/bioTypes'
 import { loadContact, saveContact, type ResumeContact } from '../data/contact'
 import { fetchContactFile } from '../api/contactApi'
+import { loadTailorPatch } from '../../tailor/tailorStorage'
+import { applyTailorResult } from '../../tailor/tailorBank'
 
 export function useResumeData(): {
   bank: BioBank | null
@@ -19,7 +21,9 @@ export function useResumeData(): {
     let cancelled = false
     fetchBioBank()
       .then((b) => {
-        if (!cancelled) setBank(b)
+        const patch = loadTailorPatch()
+        const next = patch ? applyTailorResult(b, patch) : b
+        if (!cancelled) setBank(next)
       })
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : 'Failed to load bio bank.'
