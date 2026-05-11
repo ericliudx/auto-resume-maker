@@ -3,12 +3,26 @@ import './App.css'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
 
+type LlmChatResponse =
+  | {
+      ok: true
+      result: {
+        text: string
+        model: string
+        usage?: { inputTokens: number; outputTokens: number }
+      }
+    }
+  | { ok: false; error: { code: string; message: string } }
+
 function App() {
   const [jobPostingText, setJobPostingText] = useState<string>(() => {
     const saved = localStorage.getItem(JOB_POSTING_STORAGE_KEY)
     return saved ?? ''
   })
   const [resumeText, setResumeText] = useState<string>('')
+  const [llmOutput, setLlmOutput] = useState<string>('')
+  const [llmError, setLlmError] = useState<string>('')
+  const [llmLoading, setLlmLoading] = useState<boolean>(false)
 
   useEffect(() => {
     localStorage.setItem(JOB_POSTING_STORAGE_KEY, jobPostingText)
@@ -48,6 +62,41 @@ function App() {
     return { chars, lines }
   }, [jobPostingText])
 
+  async function runLlmSmokeTest() {
+    setLlmLoading(true)
+    setLlmError('')
+    setLlmOutput('')
+
+    try {
+      const userText =
+        jobPostingText.trim() === ''
+          ? 'Write 3 bullet points describing what this app does.'
+          : `Summarize the following job posting in 6 concise bullets:\n\n${jobPostingText.slice(0, 12_000)}`
+
+      const res = await fetch('/api/llm/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          system:
+            'You are helping a user tailor a resume locally. Be concise. Use only plain text bullets.',
+          user: userText,
+          temperature: 0.2,
+        }),
+      })
+
+      const data = (await res.json()) as LlmChatResponse
+      if (data.ok === false) {
+        setLlmError(`${data.error.code}: ${data.error.message}`)
+        return
+      }
+      setLlmOutput(data.result.text)
+    } catch {
+      setLlmError('Request failed. Is the dev server running?')
+    } finally {
+      setLlmLoading(false)
+    }
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -85,6 +134,26 @@ function App() {
           />
         </section>
       </main>
+
+      <section className="panel" aria-label="LLM smoke test">
+        <div className="panel__header">
+          <h2 className="panel__title">LLM smoke test</h2>
+          <div className="panel__hint">
+            Calls local `POST /api/llm/chat` (Groq key stays server-side)
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <button onClick={runLlmSmokeTest} disabled={llmLoading}>
+            {llmLoading ? 'Running…' : 'Run'}
+          </button>
+          {llmError ? <div style={{ color: '#b91c1c' }}>{llmError}</div> : null}
+        </div>
+
+        {llmOutput ? (
+          <pre style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{llmOutput}</pre>
+        ) : null}
+      </section>
     </div>
   )
 }

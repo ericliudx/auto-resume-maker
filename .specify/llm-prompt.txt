@@ -11,17 +11,13 @@ IMPORTANT: Do **not** edit the structure (section headings/order) of `.specify/l
 
 ## Feature context (fill this in first)
 
-- Feature name: app frontend
-- Goal: create a frontend for the app. include a viewer for the resume and a text box to paste in the job posting\
+- Feature name: <kebab-case, matches `.specify/features/.../<feature-name>/`>
+- Goal: <1–2 sentences describing the user-visible outcome>
 - Non-goals / out of scope:
-  - Cloud hosting / multi-tenant deployment
-  - Authentication / user accounts
-  - ATS “optimization” guarantees
-  - Full end-to-end job application automation
-- Affected area(s): frontend
+  - <bullets>
+- Affected area(s): <areas, e.g. frontend, domain, adapters, bio/>
 - Links (optional):
-  - `.specify/vision.md`
-  - `bio/README.md`
+  - <issues/docs/etc>
 
 ## Determine scope + boundaries
 
