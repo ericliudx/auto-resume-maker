@@ -44,6 +44,13 @@ The app reads resume source material from the repo’s `bio/` folder via a local
 - **Endpoint**: `GET /api/bio/bank`
 - **Returns**: aggregated JSON from `bio/education/`, `bio/experiences/`, `bio/projects/`, `bio/skills/`
 - **Implementation**: Vite middleware in `frontend/vite.config.ts` (read-only)
+- **Ordering**: `experiences` and `projects` are sorted **newest-first** by `dates.end_date` (missing ⇒ “present”) then `dates.start_date`. This keeps the resume output stable regardless of filenames.
+
+The app also reads contact info from a single local file:
+
+- **Endpoint**: `GET /api/bio/contact`
+- **Reads**: `bio/contact.json`
+- **Notes**: Validates required string fields (`name`, `location`, `phone`, `email`, `linkedin`, `github`) and returns `server_error` if the file shape is wrong.
 
 ## How to run locally
 

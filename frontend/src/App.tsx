@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { ResumePreview } from './resume/ResumePreview'
+import { SuperResumePreview } from './resume/SuperResumePreview'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
 
@@ -17,6 +18,7 @@ type LlmChatResponse =
 
 function App() {
   const isPrint = new URLSearchParams(window.location.search).get('print') === '1'
+  const [resumeView, setResumeView] = useState<'resume' | 'super'>('resume')
 
   const [jobPostingText, setJobPostingText] = useState<string>(() => {
     const saved = localStorage.getItem(JOB_POSTING_STORAGE_KEY)
@@ -98,11 +100,35 @@ function App() {
       <main className="grid" aria-label="Resume and job posting workspace">
         <section className="panel" aria-label="Resume viewer">
           <div className="panel__header">
-            <h2 className="panel__title">Resume</h2>
-            <div className="panel__hint">Locked template (stable structure)</div>
+            <div className="panel__headerRow">
+              <div>
+                <h2 className="panel__title">Resume</h2>
+                <div className="panel__hint">Locked template (stable structure)</div>
+              </div>
+              <div className="tabs" role="tablist" aria-label="Resume views">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={resumeView === 'resume'}
+                  className={`tab ${resumeView === 'resume' ? 'tab--active' : ''}`}
+                  onClick={() => setResumeView('resume')}
+                >
+                  Resume
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={resumeView === 'super'}
+                  className={`tab ${resumeView === 'super' ? 'tab--active' : ''}`}
+                  onClick={() => setResumeView('super')}
+                >
+                  Super-resume
+                </button>
+              </div>
+            </div>
           </div>
           <div className="resumeViewer">
-            <ResumePreview mode="app" />
+            {resumeView === 'resume' ? <ResumePreview mode="app" /> : <SuperResumePreview />}
           </div>
         </section>
 

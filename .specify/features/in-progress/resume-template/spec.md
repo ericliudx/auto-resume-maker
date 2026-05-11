@@ -19,6 +19,7 @@ Generate tailored resumes while keeping a **fixed, consistent template** (sectio
   - Skills
 - Contact fields are editable in the UI and stored locally in the browser (not committed).
 - The resume preview can be printed/exported via the browser print dialog (user chooses “Save as PDF”).
+- The app provides an optional **Super-resume** view that renders the same locked template but lists **all** experiences and projects (no page-fit trimming) for manual verification.
 
 ## Data sources
 - Resume content (education/experiences/projects/skills) is loaded from the repo’s `bio/` JSON files at runtime via a **local-only** API served by the dev server.
