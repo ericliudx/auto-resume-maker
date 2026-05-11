@@ -1,0 +1,16 @@
+{
+  "id": "experience_70dd7de0e028",
+  "type": "experience",
+  "header": "Eatery Passion Project | Community Food Service Platform Founder, CTO",
+  "dates": "Jun 2024 – Present",
+  "bullets": [
+    "Launched a food service platform with peers who shared a passion for cooking which included serving weekly meals with diverse menus as well as ensuring customer satisfaction with appropriate hospitality",
+    "Developed and leveraged React and mySQL to create front and back ends for a web app, including features such as mobile ordering and rewards system, to expand accessibility and reach and grow consumer retention",
+    "Led team of fifteen staff members by managing schedules and designing menus for up to thirty customers a week, ensuring alignment and unity within team through clear communication and details"
+  ],
+  "source": {
+    "path": "bio/existing-stuff/Eric_Liu_resume copy 3.pdf",
+    "kind": "pdf"
+  },
+  "updated_at": "2026-05-11T04:00:56"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "project_09bb23d14ae6",
+  "type": "project",
+  "name": "RealTorch Cluster QC Tool",
+  "source": {
+    "path": "bio/existing-stuff/Real-Torch-QCTool.txt",
+    "kind": "txt"
+  },
+  "bullets": [
+    "Built a local React + Flask QC tool for RealTorch listing/cluster review: a React “reporting app” frontend backed by a minimal Flask qc-api, enabling QC operators to edit cluster listings, track changes, and streamline review workflows without relying on a larger monolith.",
+    "Introduced a spec-driven workflow by adding and maintaining a .specify/ documentation system with architecture maps, feature specs, plans, task checklists, and patch notes to keep refactors/behavior changes traceable.",
+    "Refactored and modularized the ClusterQCTool into a feature module (hooks/, panels/, utils/, constants/) while explicitly preserving key UI/workflow invariants (hotkeys, QC status behaviors, prompt template stability).",
+    "Implemented “QC Log” with Undo: added a new QC Log page, recorded successful QC actions to client-side localStorage, and built an Undo flow that reverts server state by replaying prior values through the existing bulk update endpoint.",
+    "Extended the backend safely with a backwards-compatible addition to POST /api/bulk-update-listings (clear_community) to support accurate undo-to-NULL behavior, without DB schema changes.",
+    "Improved operator efficiency with UX enhancements like dynamic LLM prompt generation that automatically samples addresses from the currently selected listings (tiered sampling, cap 20), and cluster listing sorting by street name (frontend-only, deterministic ordering)."
+  ],
+  "tags": [
+    "react",
+    "flask",
+    "workflow",
+    "quality-control"
+  ],
+  "updated_at": "2026-05-11T04:00:55"
+}
