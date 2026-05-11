@@ -26,6 +26,17 @@
 - **Adapters** talk to the outside world (disk, subprocess, local APIs); they do not encode core rules.
 - **Configuration** for local dev: env files or `.env` **gitignored**; never commit secrets (see `memory/constitution.md`).
 
+## Local LLM API (dev-server proxy)
+
+The `llm-api` feature currently implements a **local-only** LLM proxy inside the Vite dev server:
+
+- **Endpoint**: `POST /api/llm/chat`
+- **Why**: Keep `GROQ_API_KEY` server-side; the browser should never call the provider directly.
+- **Implementation**: Vite middleware in `frontend/vite.config.ts`
+- **Local config**: put secrets in `frontend/.env.local` (gitignored via `*.local`)
+  - `GROQ_API_KEY` (required to call Groq)
+  - `GROQ_MODEL` (optional default model id)
+
 ## How to run locally
 
 ```text
