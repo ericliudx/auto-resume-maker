@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchBioBank } from '../api/bioApi'
 import type { BioBank } from '../data/bioTypes'
-import { loadContact, type ResumeContact } from '../data/contact'
+import { loadContact, saveContact, type ResumeContact } from '../data/contact'
 import { fetchContactFile } from '../api/contactApi'
 
 export function useResumeData(): {
   bank: BioBank | null
   contact: ResumeContact
+  setContact: (next: ResumeContact) => void
   error: string
   loading: boolean
 } {
@@ -41,6 +42,14 @@ export function useResumeData(): {
     }
   }, [])
 
-  return useMemo(() => ({ bank, contact, error, loading: !bank && !error }), [bank, contact, error])
+  const setAndPersistContact = (next: ResumeContact) => {
+    setContact(next)
+    saveContact(next)
+  }
+
+  return useMemo(
+    () => ({ bank, contact, setContact: setAndPersistContact, error, loading: !bank && !error }),
+    [bank, contact, error],
+  )
 }
 

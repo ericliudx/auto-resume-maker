@@ -2,13 +2,16 @@ import { ResumeFitter } from '../fit/ResumeFitter'
 import { useResumeData } from '../hooks/useResumeData'
 import { ResumeScope } from '../ui/ResumeScope'
 import { ResumeCanvas, ResumeError, ResumeToolbar } from '../ui/ResumeShell'
+import { ContactEditor } from '../ui/ContactEditor'
+import { useState } from 'react'
 
 export function ResumePreview({
   mode,
 }: {
   mode: 'app' | 'print'
 }) {
-  const { bank, contact, error, loading } = useResumeData()
+  const { bank, contact, setContact, error, loading } = useResumeData()
+  const [showContact, setShowContact] = useState<boolean>(false)
 
   const resume = (() => {
     if (!bank) return null
@@ -30,7 +33,19 @@ export function ResumePreview({
 
   return (
     <ResumeScope className="resumePane">
-      <ResumeToolbar />
+      <ResumeToolbar
+        right={
+          <button
+            type="button"
+            className="resumePane__button"
+            onClick={() => setShowContact((v) => !v)}
+          >
+            {showContact ? 'Hide contact' : 'Edit contact'}
+          </button>
+        }
+      >
+        {showContact ? <ContactEditor value={contact} onChange={setContact} /> : null}
+      </ResumeToolbar>
       {error ? <ResumeError message={error} /> : null}
       <ResumeCanvas loading={loading}>{resume}</ResumeCanvas>
     </ResumeScope>
