@@ -90,40 +90,43 @@ function App() {
       <AppHeader meta={`Job posting: ${jobPostingStats.lines} lines · ${jobPostingStats.chars} chars`} />
 
       <main
-        className="grid grid-cols-[minmax(0,1.7fr)_minmax(0,0.3fr)] flex-1 min-h-0"
+        className="flex flex-1 min-h-0"
         aria-label="Resume and job posting workspace"
       >
-        <Panel
-          ariaLabel="Resume viewer"
-          title="Resume"
-          hint="Locked template (stable structure)"
-          right={
-            <SegmentedTabs
-              ariaLabel="Resume views"
-              value={resumeView}
-              onChange={(v) => setResumeView(v)}
-              tabs={[
-                { id: 'resume', label: 'Resume' },
-                { id: 'super', label: 'Super-resume' },
-              ]}
-            />
-          }
-        >
-          <PanelBody>
-            <div className="h-full min-h-0 min-w-0 m-0 px-4 py-3.5 overflow-auto overflow-y-scroll [scrollbar-gutter:stable_both-edges] bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]">
-              <div className="origin-top [transform:scale(0.88)]">
+        <div className="flex-1 min-w-0">
+          <Panel
+            ariaLabel="Resume viewer"
+            title="Resume"
+            hint="Locked template (stable structure)"
+            right={
+              <SegmentedTabs
+                ariaLabel="Resume views"
+                value={resumeView}
+                onChange={(v) => setResumeView(v)}
+                tabs={[
+                  { id: 'resume', label: 'Resume' },
+                  { id: 'super', label: 'Super-resume' },
+                ]}
+              />
+            }
+          >
+            <PanelBody>
+              <div
+                className={[
+                  'h-full min-h-0 min-w-0 m-0 px-4 py-3.5 overflow-auto overflow-y-scroll [scrollbar-gutter:stable_both-edges]',
+                  'bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]',
+                  // App-only "page view" scale: scale the sheet, not the toolbar/canvas chrome.
+                  '[&_.rt]:origin-top [&_.rt]:transform [&_.rt]:scale-[0.88]',
+                ].join(' ')}
+              >
                 {resumeView === 'resume' ? <ResumePreview mode="app" /> : <SuperResumePreview />}
               </div>
-            </div>
-          </PanelBody>
-        </Panel>
+            </PanelBody>
+          </Panel>
+        </div>
 
-        <div className="border-l border-[var(--border)]">
-          <Panel
-            ariaLabel="Job posting input"
-            title="Job posting"
-            hint="Saved to this browser (localStorage)"
-          >
+        <div className="border-l border-[var(--border)] w-[320px] shrink-0">
+          <Panel ariaLabel="Job posting input" title="Job posting" hint="Saved to this browser (localStorage)">
             <PanelBody>
               <textarea
                 className="h-full w-full box-border border-0 m-0 px-4 py-3.5 resize-none outline-none overflow-y-scroll [scrollbar-gutter:stable_both-edges] bg-[var(--bg)] text-[var(--text-h)] font-mono text-[13px] leading-[1.45]"
