@@ -1,30 +1,72 @@
-# Reusable prompt: feature work (local dev)
+You are an AI coding assistant working in a NEW repo that uses lightweight spec-driven docs under `.specify/`.
 
-Copy this block and fill the bracketed sections. Keep scope local (this machine / LAN).
+This is a **locally-hosted app** (dev machine / LAN). Avoid cloud/multi-tenant assumptions unless explicitly requested.
 
----
+## First: bootstrap `.specify/` if missing
 
-## Goal
-[One sentence: what should work when finished?]
+If `.specify/` does not exist yet, create:
 
-## Non-goals
-[Explicitly out of scope: cloud deploy, multi-tenant, etc.]
+- `.specify/README.md`: what this folder is, how to use it
+- `.specify/llm-prompt.txt`: this reusable feature-work template
+- `.specify/architecture/index.md`: current/planned module boundaries + local run commands (use TODOs if unknown)
+- `.specify/memory/constitution.md`: non-negotiables (quality bar, testing expectations, secrets policy)
+- `.specify/memory/coding-rules.md`: practical code conventions for this repo
+- `.specify/features/README.md`: feature lifecycle + naming rules
+- `.specify/features/in-progress/.gitkeep`
+- `.specify/features/completed/.gitkeep`
 
-## Affected areas
-[Packages, files, or subsystems—use TODO if unknown until architecture is updated.]
+Keep these docs short; prefer TODO placeholders over guessing.
 
-## Spec artifacts (create under features/in-progress/<kebab-case-name>/)
-1. spec.md — Behavior, main flows, edge cases, invariants, non-goals.
-2. plan.md — Technical approach, file/module touch list, **local verification steps** (how to run, how to test on this machine).
-3. tasks.md — Checkbox checklist aligned with plan.md.
+## Feature context (fill this in first)
 
-## Optional: api-shapes.md
-Add when request/response shapes, CLI flags, or file formats are part of the contract—even if only consumed locally.
+- Feature name: <kebab-case-feature-name>
+- Goal: <one sentence>
+- Non-goals / out of scope: <bullets>
+- Affected area(s): <frontend/backend/cli/etc>
+- Links (optional): <issues/docs/figma/etc>
 
-## Local verification
-- Run: [TODO: e.g. command from architecture/index.md]
-- Test: [TODO: e.g. unit/integration/lint command]
-- Done means: [Observable outcome on this machine]
+## Determine scope + boundaries
 
-## Remember
-- No secrets in repo; follow memory/constitution.md and memory/coding-rules.md.
+- Follow `.specify/architecture/` boundaries.
+- If boundaries aren’t documented yet, update `.specify/architecture/index.md` first with:
+  - Area ownership (what lives where)
+  - Dependency rules between areas (what can import what)
+  - Local run/test commands (or TODO)
+
+## Create feature folder
+
+Create:
+
+- `.specify/features/in-progress/<feature-name>/`
+
+Add:
+
+- `spec.md`: behavior contract (user goal, flows, edge cases/invariants, “must not change”, non-functional constraints)
+- `plan.md`: technical approach (structure, ownership boundaries, implementation sequence, verification plan)
+- `tasks.md`: checklist (mark `[x]` as you finish items)
+
+Add `api-shapes.md` only if request/response shape matters:
+
+- You are adding/changing endpoints, or
+- You rely on non-trivial response fields, or
+- You need to lock down params/bodies to avoid regressions
+
+If you skip it, say why in `plan.md`.
+
+## Update architecture docs (only when needed)
+
+Update:
+
+- `.specify/architecture/index.md` and/or the owning doc under `.specify/architecture/...`
+
+Add `patch-notes.md` when you change responsibilities or API shapes, or want durable invariants recorded.
+
+## Verify + close out (local-only)
+
+- Run the project locally and verify `spec.md` behaviors
+- Run whatever build/test commands exist (add them to `architecture/index.md` if missing)
+- Cleanup dead code/temp files/stale links
+
+When done and verified:
+
+- Move `.specify/features/in-progress/<feature>/` → `.specify/features/completed/<feature>/`

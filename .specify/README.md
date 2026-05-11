@@ -6,6 +6,7 @@ Small, traceable specs for **local-only** work on this machine (or LAN). No clou
 
 | Path | Purpose |
 |------|---------|
+| `vision.md` | Product north star: experience bank + tailored, page-fit resumes. Feature specs should trace back here. |
 | `features/` | Per-feature folders: behavior (`spec.md`), approach (`plan.md`), checklist (`tasks.md`). Lifecycle: `in-progress/` → `completed/`. |
 | `architecture/` | Where code *should* live, package boundaries, and how you **run** the app locally. |
 | `memory/` | Durable rules: non-negotiables (`constitution.md`) and stack-specific habits (`coding-rules.md`). |
@@ -19,6 +20,7 @@ Small, traceable specs for **local-only** work on this machine (or LAN). No clou
 
 | Situation | Update |
 |-----------|--------|
+| **North star** or pillar emphasis changes | `vision.md`, then align open feature specs. |
 | New or changed **user-visible behavior** | Add/update `features/.../spec.md`, then `plan.md` and `tasks.md`. |
 | New **API or data contract** (even local) | Consider `api-shapes.md` next to the feature specs. |
 | New **module or boundary** | `architecture/index.md` (and a new `architecture/<area>/` file only if it keeps files small). |

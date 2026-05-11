@@ -2,14 +2,23 @@
 
 **Status:** Stack and layout not chosen yet. Replace `TODO` sections after bootstrap.
 
+**Product context:** See [`vision.md`](../vision.md) (experience **bank**, **tailoring**, **page-fit** output).
+
 ## Planned or actual layout
 
 | Area | Path / package (TODO) | Responsibility |
 |------|------------------------|----------------|
 | Entry / app shell | `TODO` | How the process starts; wires config and UI or CLI |
-| Core domain | `TODO` | Business rules for this project (name when known) |
-| Adapters | `TODO` | File I/O, local services, LAN calls—keep thin |
+| Core domain | `TODO` | Bank model, tailoring rules, layout/page-fit constraints (names TBD per stack) |
+| Adapters | `TODO` | Persistence (local files/DB), print/PDF or export pipeline—keep thin |
 | Tests | `TODO` | Unit / integration layout for this stack |
+
+## Experience bank on disk
+
+- **Root folder:** Repo-relative [`bio/`](../../bio/README.md)—see that README for sibling folders (`experiences/`, `projects/`, etc.).
+- **Convention:** One **experience** ⇒ one **`bio/experiences/*.json`** file (role, internship, freelance engagement, etc.—whatever you treat as atomic in the domain).
+- **Why:** Cleaner git history than a single huge file; you can rename/move one experience without rewriting the bank.
+- **TODO:** Filename scheme (stable **`id`** in the JSON + `'<id>.json'` works well) and shared **JSON Schema** once fields settle.
 
 ## Boundaries
 
