@@ -13,9 +13,15 @@ IMPORTANT: Do **not** edit the structure (section headings/order) of `.specify/l
 
 - Feature name: app frontend
 - Goal: create a frontend for the app. include a viewer for the resume and a text box to paste in the job posting\
-- Non-goals / out of scope: <bullets>
+- Non-goals / out of scope:
+  - Cloud hosting / multi-tenant deployment
+  - Authentication / user accounts
+  - ATS “optimization” guarantees
+  - Full end-to-end job application automation
 - Affected area(s): frontend
-- Links (optional): <issues/docs/etc>
+- Links (optional):
+  - `.specify/vision.md`
+  - `bio/README.md`
 
 ## Determine scope + boundaries
 
