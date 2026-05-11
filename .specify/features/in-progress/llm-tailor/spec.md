@@ -14,6 +14,20 @@ As a user working locally, I want to paste (or upload) a job description and gen
   - Prefer high-signal bullets with metrics and outcomes.
 - App renders the tailored resume in the locked template preview.
 
+### ATS keyword match report (assistive)
+
+- The app extracts a ranked list of keywords/skill phrases from the job posting.
+- The app computes a match report against the current resume content:
+  - covered keywords
+  - missing keywords
+  - a simple match score for iteration (“does this get better after tailoring?”)
+
+### Keyword-focused tailoring (assistive)
+
+- User can run a keyword-focused tailor that targets *missing* high-signal job keywords.
+- The app requires the model to show “proof of placement” (which bullet each added keyword was placed into).
+- The app must not add keywords that would be fabrication; those are surfaced as “cannot add” items.
+
 ### Fit to one page (when requested)
 
 - When the user enables one-page fit, the app trims/condenses low-signal content while preserving:

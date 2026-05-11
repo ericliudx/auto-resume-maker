@@ -18,5 +18,14 @@ export type TailorModelResult = {
     tech?: string[]
   }>
   skills?: { groups?: Array<{ name: string; items: string[] }> }
+
+  // Keyword-focused tailor metadata (assistive / transparency)
+  keywordMap?: Array<{
+    keyword: string
+    target: 'experience' | 'project'
+    id: string
+    bulletIndex: number
+  }>
+  cannotAdd?: Array<{ keyword: string; reason: string }>
 }
 

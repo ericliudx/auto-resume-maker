@@ -6,6 +6,32 @@ import { fetchContactFile } from '../api/contactApi'
 import { loadTailorPatch } from '../../tailor/tailorStorage'
 import { applyTailorResult } from '../../tailor/tailorBank'
 
+function dedupeStrings(xs: string[]): string[] {
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const s of xs) {
+    const k = s.trim()
+    if (!k || seen.has(k)) continue
+    seen.add(k)
+    out.push(s)
+  }
+  return out
+}
+
+function normalizeBank(b: BioBank): BioBank {
+  return {
+    ...b,
+    experiences: b.experiences.map((e) => ({
+      ...e,
+      bullets: Array.isArray(e.bullets) ? dedupeStrings(e.bullets) : e.bullets,
+    })),
+    projects: b.projects.map((p) => ({
+      ...p,
+      bullets: Array.isArray(p.bullets) ? dedupeStrings(p.bullets) : p.bullets,
+    })),
+  }
+}
+
 export function useResumeData(): {
   bank: BioBank | null
   contact: ResumeContact
@@ -22,7 +48,7 @@ export function useResumeData(): {
     fetchBioBank()
       .then((b) => {
         const patch = loadTailorPatch()
-        const next = patch ? applyTailorResult(b, patch) : b
+        const next = normalizeBank(patch ? applyTailorResult(b, patch) : b)
         if (!cancelled) setBank(next)
       })
       .catch((e: unknown) => {

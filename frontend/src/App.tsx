@@ -7,16 +7,36 @@ import { SegmentedTabs } from './components/SegmentedTabs'
 import { LlmPanel } from './components/LlmPanel'
 import { useLocalStorageState } from './hooks/useLocalStorageState'
 import { useLlmTools } from './hooks/useLlmTools'
+import { useAtsMatch } from './hooks/useAtsMatch'
+import type { AtsRole } from './ats/keywordExtract'
+import { useLocalStorageNumberState } from './hooks/useLocalStorageNumberState'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
+const ATS_ROLE_STORAGE_KEY = 'auto-resume.atsRole.v1'
+const ATS_KEYWORD_LIMIT_STORAGE_KEY = 'auto-resume.atsKeywordLimit.v1'
 
 function App() {
   const isPrint = new URLSearchParams(window.location.search).get('print') === '1'
   const [resumeView, setResumeView] = useState<'resume' | 'super'>('resume')
 
   const [jobPostingText, setJobPostingText] = useLocalStorageState(JOB_POSTING_STORAGE_KEY, '')
-  const { llmLoading, llmOutput, llmError, tailoredBank, runLlmSmokeTest, tailorResume, clearTailor } =
-    useLlmTools()
+  const {
+    llmLoading,
+    llmOutput,
+    llmError,
+    tailoredBank,
+    runLlmSmokeTest,
+    tailorResume,
+    atsTailorResume,
+    clearTailor,
+  } = useLlmTools()
+  const { atsLoading, atsError, report, missingTop, detectedRole, analyze } = useAtsMatch()
+  const [atsRole, setAtsRole] = useLocalStorageState(ATS_ROLE_STORAGE_KEY, 'auto')
+  const [atsKeywordLimit, setAtsKeywordLimit] = useLocalStorageNumberState(
+    ATS_KEYWORD_LIMIT_STORAGE_KEY,
+    25,
+    { min: 10, max: 60 },
+  )
 
   useEffect(() => {
     if (!isPrint) return
@@ -101,6 +121,22 @@ function App() {
         hasTailoredBank={Boolean(tailoredBank)}
         onRunSmokeTest={() => runLlmSmokeTest(jobPostingText)}
         onTailor={() => tailorResume(jobPostingText)}
+        atsLoading={atsLoading}
+        atsError={atsError}
+        atsScore={report?.score ?? null}
+        atsMissingTop={missingTop}
+        atsRole={atsRole as AtsRole}
+        atsKeywordLimit={atsKeywordLimit}
+        atsDetected={detectedRole}
+        onChangeAtsRole={(r) => setAtsRole(r)}
+        onChangeAtsKeywordLimit={(n) => setAtsKeywordLimit(n)}
+        onAnalyzeAts={() =>
+          analyze({ jobPostingText, role: atsRole as AtsRole, limit: atsKeywordLimit })
+        }
+        onAtsTailor={async () => {
+          await atsTailorResume({ jobPostingText, missingKeywords: missingTop })
+          await analyze({ jobPostingText, role: atsRole as AtsRole, limit: atsKeywordLimit })
+        }}
         onClear={clearTailor}
       />
     </div>

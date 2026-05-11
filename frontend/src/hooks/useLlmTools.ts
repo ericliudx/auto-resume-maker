@@ -6,7 +6,10 @@ import { stripOptionalMarkdownCodeFence } from '../llm/text'
 import type { TailorModelResult } from '../tailor/tailorTypes'
 import { applyTailorResult, bankFingerprint } from '../tailor/tailorBank'
 import { buildTailorPrompt } from '../tailor/tailorPrompt'
+import { buildAtsTailorPrompt } from '../tailor/atsTailorPrompt'
+import { validateTailorResult } from '../tailor/validateTailor'
 import { clearTailorPatch, loadTailorPatch, saveTailorPatch } from '../tailor/tailorStorage'
+import { loadTruthAddendum } from '../tailor/truthAddendum'
 
 export function useLlmTools(): {
   llmLoading: boolean
@@ -15,6 +18,7 @@ export function useLlmTools(): {
   tailoredBank: BioBank | null
   runLlmSmokeTest: (jobPostingText: string) => Promise<void>
   tailorResume: (jobPostingText: string) => Promise<void>
+  atsTailorResume: (args: { jobPostingText: string; missingKeywords: string[] }) => Promise<void>
   clearTailor: () => void
 } {
   const [llmOutput, setLlmOutput] = useState<string>('')
@@ -24,7 +28,7 @@ export function useLlmTools(): {
 
   const hydrateTailorFromStorage = useCallback(async () => {
     const patch = loadTailorPatch()
-    if (!patch) return
+    if (!patch) return;
     try {
       const bank = await fetchBioBank()
       setTailoredBank(applyTailorResult(bank, patch))
@@ -37,7 +41,7 @@ export function useLlmTools(): {
   useEffect(() => {
     const t = window.setTimeout(() => {
       void hydrateTailorFromStorage()
-    }, 0)
+    }, 0);
     return () => window.clearTimeout(t)
   }, [hydrateTailorFromStorage])
 
@@ -53,7 +57,8 @@ export function useLlmTools(): {
           : `Summarize the following job posting in 6 concise bullets:\n\n${jobPostingText.slice(0, 12_000)}`
 
       const data = await llmChat({
-        system: 'You are helping a user tailor a resume locally. Be concise. Use only plain text bullets.',
+        system:
+          'You are helping a user tailor a resume locally. Be concise. Use only plain text bullets.',
         user: userText,
         temperature: 0.2,
       })
@@ -88,7 +93,8 @@ export function useLlmTools(): {
       const prompt = buildTailorPrompt({ jobText, bank })
 
       const data = await llmChat({
-        system: 'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape.',
+        system:
+          'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape.',
         user: prompt,
         temperature: 0.2,
       })
@@ -99,17 +105,32 @@ export function useLlmTools(): {
       }
 
       const raw = stripOptionalMarkdownCodeFence(data.result.text)
-      const parsed = JSON.parse(raw) as TailorModelResult
-      const next = applyTailorResult(bank, parsed)
-      saveTailorPatch(parsed)
+      let parsed: TailorModelResult
+      try {
+        parsed = JSON.parse(raw) as TailorModelResult
+      } catch {
+        setLlmError('Tailor failed: model returned invalid JSON.')
+        setLlmOutput(`Raw model output:\n\n${data.result.text}`)
+        return
+      }
+
+      const validated = validateTailorResult({ base: bank, result: parsed, mode: 'default' })
+      if (!validated.ok) {
+        setLlmError(`Tailor failed: ${validated.message}`)
+        setLlmOutput(`Raw JSON:\n\n${raw}`)
+        return
+      }
+
+      const next = applyTailorResult(bank, validated.normalized)
+      saveTailorPatch(validated.normalized)
       setTailoredBank(next)
       setLlmOutput(
         [
           'Tailor applied (derived view; bio bank unchanged).',
           `Base: ${bankFingerprint(bank)}`,
           `Tailored: ${bankFingerprint(next)}`,
-          `Selected experienceIds: ${(parsed.experienceIds ?? []).join(', ') || '(none)'}`,
-          `Selected projectIds: ${(parsed.projectIds ?? []).join(', ') || '(none)'}`,
+          `Selected experienceIds: ${(validated.normalized.experienceIds ?? []).join(', ') || '(none)'}`,
+          `Selected projectIds: ${(validated.normalized.projectIds ?? []).join(', ') || '(none)'}`,
         ].join('\n'),
       )
     } catch (e: unknown) {
@@ -119,6 +140,95 @@ export function useLlmTools(): {
       setLlmLoading(false)
     }
   }, [])
+
+  const atsTailorResume = useCallback(
+    async (args: { jobPostingText: string; missingKeywords: string[] }) => {
+      setLlmLoading(true)
+      setLlmError('')
+      setLlmOutput('')
+
+      try {
+        const bank = await fetchBioBank()
+        const jobText = args.jobPostingText.trim().slice(0, 12_000)
+        if (jobText === '') {
+          setLlmError('Paste a job posting first.')
+          return
+        }
+        if (args.missingKeywords.length === 0) {
+          setLlmError('Run Analyze ATS first (no missing keywords found).')
+          return
+        }
+
+        setLlmOutput(`ATS Tailor started… Base bank: ${bankFingerprint(bank)}`)
+
+        const truthAddendum = await loadTruthAddendum()
+        const prompt = buildAtsTailorPrompt({
+          jobText,
+          bank,
+          missingKeywords: args.missingKeywords,
+          truthAddendum,
+        })
+        const data = await llmChat({
+          system:
+            'You are optimizing keyword match responsibly. Output must be strictly valid JSON per the requested shape.',
+          user: prompt,
+          temperature: 0.2,
+        })
+
+        if (data.ok === false) {
+          setLlmError(`${data.error.code}: ${data.error.message}`)
+          return
+        }
+
+        const raw = stripOptionalMarkdownCodeFence(data.result.text)
+        let parsed: TailorModelResult
+        try {
+          parsed = JSON.parse(raw) as TailorModelResult
+        } catch {
+          setLlmError('ATS Tailor failed: model returned invalid JSON.')
+          setLlmOutput(`Raw model output:\n\n${data.result.text}`)
+          return
+        }
+
+        const validated = validateTailorResult({ base: bank, result: parsed, mode: 'ats' })
+        if (!validated.ok) {
+          setLlmError(`ATS Tailor failed: ${validated.message}`)
+          setLlmOutput(`Raw JSON:\n\n${raw}`)
+          return
+        }
+
+        const next = applyTailorResult(bank, validated.normalized)
+        saveTailorPatch(validated.normalized)
+        setTailoredBank(next)
+
+        const placed = (validated.normalized.keywordMap ?? []).length
+        const blocked = (validated.normalized.cannotAdd ?? []).length
+        setLlmOutput(
+          [
+            'ATS Tailor applied (derived view; bio bank unchanged).',
+            `Base: ${bankFingerprint(bank)}`,
+            `Tailored: ${bankFingerprint(next)}`,
+            `Placed keywords: ${placed}`,
+            `Cannot add: ${blocked}`,
+            blocked
+              ? `Top cannotAdd: ${(validated.normalized.cannotAdd ?? [])
+                  .slice(0, 5)
+                  .map((x) => x.keyword)
+                  .join(', ')}`
+              : '',
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        )
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'ATS Tailor request failed.'
+        setLlmError(msg)
+      } finally {
+        setLlmLoading(false)
+      }
+    },
+    [],
+  )
 
   const clearTailor = useCallback(() => {
     clearTailorPatch()
@@ -132,7 +242,7 @@ export function useLlmTools(): {
     tailoredBank,
     runLlmSmokeTest,
     tailorResume,
+    atsTailorResume,
     clearTailor,
   }
 }
-
