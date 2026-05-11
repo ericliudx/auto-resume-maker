@@ -2,6 +2,7 @@ import type { BioBank, BioExperience, BioProject } from '../resume/data/bioTypes
 import { extractAtsKeywords } from '../ats/keywordExtract'
 import type { TailorModelResult } from './tailorTypes'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
+import { capRelevantCoursesList } from './relevantCoursesCap'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
 
 /** Max items to auto-pick for simple (non-V2) plans; avoids forcing exactly 3 while staying bounded. */
@@ -72,6 +73,10 @@ export function generateDeterministicTailorPatch(args: {
   if ('experienceIds' in args.plan && 'projectIds' in args.plan) {
     const plan = args.plan as TailorPlanV2
     const pdfFileName = sanitizePdfFileNameForPlan(plan.pdfFileName)
+    const rc =
+      Array.isArray(plan.relevantCourses) && plan.relevantCourses.length
+        ? capRelevantCoursesList(plan.relevantCourses.filter((c): c is string => typeof c === 'string'))
+        : undefined
     return {
       experienceIds: plan.experienceIds,
       projectIds: plan.projectIds,
@@ -79,6 +84,7 @@ export function generateDeterministicTailorPatch(args: {
       projects: (plan.projectPatches ?? []).map((p) => ({ ...p })),
       skills: plan.skillsGroups ? { groups: plan.skillsGroups } : undefined,
       ...(pdfFileName ? { pdfFileName } : {}),
+      ...(rc?.length ? { relevantCourses: rc } : {}),
     }
   }
 

@@ -30,5 +30,8 @@ export type TailorModelResult = {
 
   /** Save-to-PDF suggested name when present and valid (`First_Last_Company`). */
   pdfFileName?: string
+
+  /** Subset of `course_bank` course names; applied after experience/project/skills patches. */
+  relevantCourses?: string[]
 }
 

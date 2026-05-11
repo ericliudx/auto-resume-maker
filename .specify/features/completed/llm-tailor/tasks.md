@@ -1,15 +1,11 @@
 # llm-tailor — tasks
 
-- [x] Draft prompts + structured output shape for tailoring (no fabrications; preserve facts)
-- [x] Implement frontend tailoring UI (job description input + controls)
-- [x] Call existing local LLM API (`POST /api/llm/chat`) and parse response
-- [x] Map tailored output into resume rendering while keeping template locked
-- [x] Add ATS match report (extract keywords, compute coverage + score)
-- [x] Add ATS-tailor prompt + “proof of placement” output (`keywordMap`, `cannotAdd`)
-- [x] Add ATS controls (role preset + keyword limit) and re-analyze loop
-- [x] Add paste-and-apply tailor plan (parse + deterministic patch)
-- [x] When generating a Tailor Plan, also output “biggest gaps” (missing keywords + missing signals + next edits)
-- [x] Integrate/extend page-fit trimming (one-page mode)
-- [x] Show omitted/trimmed content for manual review
-- [x] Verify locally per `plan.md` (lint, build, manual checks)
-
+- [x] Wire tailor user prompt to `.specify/general-tailor-llm-prompt.txt` + bank JSON + job posting
+- [x] Parse LLM output (JSON + optional `BIGGEST_GAPS`), map patch shape to `TailorModelResult`, validate, apply, persist
+- [x] Apply `relevantCourses` on LLM tailor success; share helper with deterministic plan apply
+- [x] Sync ATS role/limit + re-run analyze after successful LLM tailor
+- [x] Remove LLM smoke test from UI and `useLlmTools`
+- [x] Document feature under `.specify/features/completed/llm-tailor/`
+- [x] Update architecture note for prompt source; reset `.specify/llm-prompt.txt` feature placeholders
+- [x] `npm run build` in `frontend/`
+- [x] Persist `relevantCourses` on `TailorModelResult` and reapply on load (`applyTailorPatchToBank`)

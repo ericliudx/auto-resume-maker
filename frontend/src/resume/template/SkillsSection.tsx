@@ -1,4 +1,5 @@
 import type { BioSkills } from '../data/bioTypes'
+import { MAX_SKILLS_PER_GROUP } from '../skillsCap'
 
 const LEGACY_ORDER = ['technical', 'leadership', 'others'] as const
 
@@ -37,7 +38,7 @@ function collectGroups(skills: BioSkills[]): Map<string, { label: string; items:
 
     const existing = byKey.get(key)
     const label = existing?.label ?? nameRaw
-    const merged = dedupeItems([...(existing?.items ?? []), ...items])
+    const merged = dedupeItems([...(existing?.items ?? []), ...items]).slice(0, MAX_SKILLS_PER_GROUP)
     byKey.set(key, { label, items: merged })
   }
 
