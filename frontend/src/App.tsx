@@ -4,35 +4,19 @@ import { SuperResumePreview } from './resume/views/SuperResumePreview'
 import { AppHeader } from './components/AppHeader'
 import { Panel, PanelBody } from './components/Panels'
 import { SegmentedTabs } from './components/SegmentedTabs'
+import { LlmPanel } from './components/LlmPanel'
+import { useLocalStorageState } from './hooks/useLocalStorageState'
+import { useLlmTools } from './hooks/useLlmTools'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
-
-type LlmChatResponse =
-  | {
-      ok: true
-      result: {
-        text: string
-        model: string
-        usage?: { inputTokens: number; outputTokens: number }
-      }
-    }
-  | { ok: false; error: { code: string; message: string } }
 
 function App() {
   const isPrint = new URLSearchParams(window.location.search).get('print') === '1'
   const [resumeView, setResumeView] = useState<'resume' | 'super'>('resume')
 
-  const [jobPostingText, setJobPostingText] = useState<string>(() => {
-    const saved = localStorage.getItem(JOB_POSTING_STORAGE_KEY)
-    return saved ?? ''
-  })
-  const [llmOutput, setLlmOutput] = useState<string>('')
-  const [llmError, setLlmError] = useState<string>('')
-  const [llmLoading, setLlmLoading] = useState<boolean>(false)
-
-  useEffect(() => {
-    localStorage.setItem(JOB_POSTING_STORAGE_KEY, jobPostingText)
-  }, [jobPostingText])
+  const [jobPostingText, setJobPostingText] = useLocalStorageState(JOB_POSTING_STORAGE_KEY, '')
+  const { llmLoading, llmOutput, llmError, tailoredBank, runLlmSmokeTest, tailorResume, clearTailor } =
+    useLlmTools()
 
   useEffect(() => {
     if (!isPrint) return
@@ -46,42 +30,8 @@ function App() {
     return { chars, lines }
   }, [jobPostingText])
 
-  async function runLlmSmokeTest() {
-    setLlmLoading(true)
-    setLlmError('')
-    setLlmOutput('')
-
-    try {
-      const userText =
-        jobPostingText.trim() === ''
-          ? 'Write 3 bullet points describing what this app does.'
-          : `Summarize the following job posting in 6 concise bullets:\n\n${jobPostingText.slice(0, 12_000)}`
-
-      const res = await fetch('/api/llm/chat', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          system:
-            'You are helping a user tailor a resume locally. Be concise. Use only plain text bullets.',
-          user: userText,
-          temperature: 0.2,
-        }),
-      })
-
-      const data = (await res.json()) as LlmChatResponse
-      if (data.ok === false) {
-        setLlmError(`${data.error.code}: ${data.error.message}`)
-        return
-      }
-      setLlmOutput(data.result.text)
-    } catch {
-      setLlmError('Request failed. Is the dev server running?')
-    } finally {
-      setLlmLoading(false)
-    }
-  }
-
   if (isPrint) {
+    // Print route is a new render; ResumePreview uses `useResumeData()` which applies any stored tailor patch.
     return <ResumePreview mode="print" />
   }
 
@@ -96,7 +46,7 @@ function App() {
         <div className="flex-1 min-w-0">
           <Panel
             ariaLabel="Resume viewer"
-            title="Resume"
+            title={`Resume${tailoredBank ? ' (tailored)' : ''}`}
             hint="Locked template (stable structure)"
             right={
               <SegmentedTabs
@@ -119,7 +69,11 @@ function App() {
                   '[&_.rt]:origin-top [&_.rt]:transform [&_.rt]:scale-[0.88]',
                 ].join(' ')}
               >
-                {resumeView === 'resume' ? <ResumePreview mode="app" /> : <SuperResumePreview />}
+                {resumeView === 'resume' ? (
+                  <ResumePreview mode="app" bankOverride={tailoredBank} />
+                ) : (
+                  <SuperResumePreview bankOverride={tailoredBank} />
+                )}
               </div>
             </PanelBody>
           </Panel>
@@ -140,34 +94,15 @@ function App() {
         </div>
       </main>
 
-      <div className="border-t border-[var(--border)]">
-        <Panel
-          ariaLabel="LLM smoke test"
-          title="LLM smoke test"
-          hint={
-            <>
-              Calls local <code className="px-1 py-0.5 rounded bg-[var(--code-bg)]">POST /api/llm/chat</code> (Groq key stays server-side)
-            </>
-          }
-        >
-          <PanelBody className="px-4 py-3.5">
-            <div className="flex gap-3 items-center">
-              <button
-                onClick={runLlmSmokeTest}
-                disabled={llmLoading}
-                className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--social-bg)] text-[var(--text-h)] text-xs leading-none disabled:opacity-60"
-              >
-                {llmLoading ? 'Running…' : 'Run'}
-              </button>
-              {llmError ? <div className="text-[#b91c1c] text-xs">{llmError}</div> : null}
-            </div>
-
-            {llmOutput ? (
-              <pre className="whitespace-pre-wrap mt-3 text-xs text-[var(--text-h)]">{llmOutput}</pre>
-            ) : null}
-          </PanelBody>
-        </Panel>
-      </div>
+      <LlmPanel
+        loading={llmLoading}
+        output={llmOutput}
+        error={llmError}
+        hasTailoredBank={Boolean(tailoredBank)}
+        onRunSmokeTest={() => runLlmSmokeTest(jobPostingText)}
+        onTailor={() => tailorResume(jobPostingText)}
+        onClear={clearTailor}
+      />
     </div>
   )
 }

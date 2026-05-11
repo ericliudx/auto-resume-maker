@@ -2,10 +2,12 @@ import { ResumeTemplate } from '../ResumeTemplate'
 import { useResumeData } from '../hooks/useResumeData'
 import { ResumeScope } from '../ui/ResumeScope'
 import { ResumeCanvas, ResumeError } from '../ui/ResumeShell'
+import type { BioBank } from '../data/bioTypes'
 
-export function SuperResumePreview() {
+export function SuperResumePreview({ bankOverride }: { bankOverride?: BioBank | null }) {
   const { bank, contact, error, loading } = useResumeData()
-  const view = bank ? <ResumeTemplate bank={bank} contact={contact} /> : null
+  const effectiveBank = bankOverride ?? bank
+  const view = effectiveBank ? <ResumeTemplate bank={effectiveBank} contact={contact} /> : null
 
   return (
     <ResumeScope>
