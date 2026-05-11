@@ -1,5 +1,37 @@
-import type { BioBank } from '../resume/data/bioTypes'
+import type { BioBank, BioSkills } from '../resume/data/bioTypes'
 import type { TailorModelResult } from './tailorTypes'
+import { sanitizeResumeBank } from './resumeTypography'
+
+function normSkillGroupName(s: string): string {
+  return s.trim().toLowerCase()
+}
+
+/** Replace only the `technical` group from the patch; keep `leadership` and `others` from the base bio. */
+function mergeSkillsTechnicalOnly(
+  baseSkills: BioSkills[],
+  patchGroups: Array<{ name: string; items: string[] }> | undefined,
+): BioSkills[] {
+  if (!baseSkills[0] || !patchGroups?.length) return baseSkills
+
+  const patchTechnical = patchGroups.find((g) => normSkillGroupName(g.name) === 'technical')
+  if (!patchTechnical || !Array.isArray(patchTechnical.items)) return baseSkills
+
+  const baseDoc = baseSkills[0]
+  const baseGroups = Array.isArray(baseDoc.groups) ? [...baseDoc.groups] : []
+
+  let found = false
+  const mergedGroups = baseGroups.map((g) => {
+    if (normSkillGroupName(g.name) !== 'technical') return g
+    found = true
+    return { ...g, items: [...patchTechnical.items] }
+  })
+
+  if (!found) {
+    mergedGroups.unshift({ name: 'technical', items: [...patchTechnical.items] })
+  }
+
+  return [{ ...baseDoc, groups: mergedGroups }]
+}
 
 export function makeBankForPrompt(bank: BioBank): unknown {
   return {
@@ -73,14 +105,15 @@ export function applyTailorResult(base: BioBank, r: TailorModelResult): BioBank 
       }
     })
 
-  const skills =
-    r.skills?.groups && base.skills[0] ? [{ ...base.skills[0], groups: r.skills.groups }] : base.skills
+  const skills = r.skills?.groups?.length
+    ? mergeSkillsTechnicalOnly(base.skills, r.skills.groups)
+    : base.skills
 
-  return {
+  return sanitizeResumeBank({
     ...base,
     experiences: orderedExperiences,
     projects: orderedProjects,
     skills,
-  }
+  })
 }
 

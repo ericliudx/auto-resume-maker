@@ -9,7 +9,9 @@ import { buildTailorPrompt } from '../tailor/tailorPrompt'
 import { buildAtsTailorPrompt } from '../tailor/atsTailorPrompt'
 import { validateTailorResult } from '../tailor/validateTailor'
 import { clearTailorPatch, loadTailorPatch, saveTailorPatch } from '../tailor/tailorStorage'
-import { loadTruthAddendum } from '../tailor/truthAddendum'
+import { generateDeterministicTailorPatch } from '../tailor/deterministicTailor'
+import type { TailorPlan, TailorPlanV2 } from '../tailor/planTypes'
+import { sanitizeResumeTypography } from '../tailor/resumeTypography'
 
 export function useLlmTools(): {
   llmLoading: boolean
@@ -19,6 +21,7 @@ export function useLlmTools(): {
   runLlmSmokeTest: (jobPostingText: string) => Promise<void>
   tailorResume: (jobPostingText: string) => Promise<void>
   atsTailorResume: (args: { jobPostingText: string; missingKeywords: string[] }) => Promise<void>
+  applyDeterministicPlan: (args: { jobPostingText: string; plan: TailorPlan | TailorPlanV2 }) => Promise<void>
   clearTailor: () => void
 } {
   const [llmOutput, setLlmOutput] = useState<string>('')
@@ -94,7 +97,7 @@ export function useLlmTools(): {
 
       const data = await llmChat({
         system:
-          'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape.',
+          'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape. The top-level pdfFileName field is required.',
         user: prompt,
         temperature: 0.2,
       })
@@ -129,6 +132,7 @@ export function useLlmTools(): {
           'Tailor applied (derived view; bio bank unchanged).',
           `Base: ${bankFingerprint(bank)}`,
           `Tailored: ${bankFingerprint(next)}`,
+          `Print/PDF title (saved): ${validated.normalized.pdfFileName ?? '(none)'}`,
           `Selected experienceIds: ${(validated.normalized.experienceIds ?? []).join(', ') || '(none)'}`,
           `Selected projectIds: ${(validated.normalized.projectIds ?? []).join(', ') || '(none)'}`,
         ].join('\n'),
@@ -161,12 +165,10 @@ export function useLlmTools(): {
 
         setLlmOutput(`ATS Tailor started… Base bank: ${bankFingerprint(bank)}`)
 
-        const truthAddendum = await loadTruthAddendum()
         const prompt = buildAtsTailorPrompt({
           jobText,
           bank,
           missingKeywords: args.missingKeywords,
-          truthAddendum,
         })
         const data = await llmChat({
           system:
@@ -230,6 +232,52 @@ export function useLlmTools(): {
     [],
   )
 
+  const applyDeterministicPlan = useCallback(async (args: { jobPostingText: string; plan: TailorPlan | TailorPlanV2 }) => {
+    setLlmLoading(true)
+    setLlmError('')
+    setLlmOutput('')
+
+    try {
+      const bank = await fetchBioBank()
+      const jobText = args.jobPostingText.trim().slice(0, 12_000)
+      if (jobText === '') {
+        setLlmError('Paste a job posting first.')
+        return
+      }
+
+      const patch = generateDeterministicTailorPatch({ bank, jobText, plan: args.plan })
+      // Apply content patch, then optionally apply plan-only course selection (bank-level).
+      let next = applyTailorResult(bank, patch)
+      if ('experienceIds' in args.plan) {
+        const planV2 = args.plan as TailorPlanV2
+        if (Array.isArray(planV2.relevantCourses)) {
+          const courses = planV2.relevantCourses.map((c) => sanitizeResumeTypography(String(c)))
+          next = {
+            ...next,
+            education: next.education.map((e) =>
+              e.type === 'course_bank' ? { ...e, courses } : e,
+            ),
+          }
+        }
+      }
+      saveTailorPatch(patch)
+      setTailoredBank(next)
+      setLlmOutput(
+        [
+          'Applied deterministic plan (selection + ordering).',
+          `Tailored: ${bankFingerprint(next)}`,
+          `Selected experienceIds: ${(patch.experienceIds ?? []).join(', ') || '(none)'}`,
+          `Selected projectIds: ${(patch.projectIds ?? []).join(', ') || '(none)'}`,
+        ].join('\n'),
+      )
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Apply plan failed.'
+      setLlmError(msg)
+    } finally {
+      setLlmLoading(false)
+    }
+  }, [])
+
   const clearTailor = useCallback(() => {
     clearTailorPatch()
     setTailoredBank(null)
@@ -243,6 +291,7 @@ export function useLlmTools(): {
     runLlmSmokeTest,
     tailorResume,
     atsTailorResume,
+    applyDeterministicPlan,
     clearTailor,
   }
 }
