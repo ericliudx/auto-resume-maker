@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { ResumePreview } from './resume/ResumePreview'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
 
@@ -15,11 +16,12 @@ type LlmChatResponse =
   | { ok: false; error: { code: string; message: string } }
 
 function App() {
+  const isPrint = new URLSearchParams(window.location.search).get('print') === '1'
+
   const [jobPostingText, setJobPostingText] = useState<string>(() => {
     const saved = localStorage.getItem(JOB_POSTING_STORAGE_KEY)
     return saved ?? ''
   })
-  const [resumeText, setResumeText] = useState<string>('')
   const [llmOutput, setLlmOutput] = useState<string>('')
   const [llmError, setLlmError] = useState<string>('')
   const [llmLoading, setLlmLoading] = useState<boolean>(false)
@@ -29,32 +31,10 @@ function App() {
   }, [jobPostingText])
 
   useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      try {
-        const res = await fetch('/resume.txt', { cache: 'no-store' })
-        if (!res.ok) throw new Error(`Failed to load resume.txt: ${res.status}`)
-        const text = await res.text()
-        if (!cancelled) setResumeText(text)
-      } catch {
-        if (!cancelled) {
-          setResumeText(
-            [
-              'No resume preview found yet.',
-              '',
-              'Add a file at `frontend/public/resume.txt` to populate this viewer.',
-            ].join('\n'),
-          )
-        }
-      }
-    }
-
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    if (!isPrint) return
+    const t = window.setTimeout(() => window.print(), 50)
+    return () => window.clearTimeout(t)
+  }, [isPrint])
 
   const jobPostingStats = useMemo(() => {
     const chars = jobPostingText.length
@@ -97,6 +77,10 @@ function App() {
     }
   }
 
+  if (isPrint) {
+    return <ResumePreview mode="print" />
+  }
+
   return (
     <div className="app">
       <header className="header">
@@ -115,9 +99,11 @@ function App() {
         <section className="panel" aria-label="Resume viewer">
           <div className="panel__header">
             <h2 className="panel__title">Resume</h2>
-            <div className="panel__hint">Loaded from `frontend/public/resume.txt`</div>
+            <div className="panel__hint">Locked template (stable structure)</div>
           </div>
-          <pre className="resumeViewer">{resumeText}</pre>
+          <div className="resumeViewer">
+            <ResumePreview mode="app" />
+          </div>
         </section>
 
         <section className="panel" aria-label="Job posting input">

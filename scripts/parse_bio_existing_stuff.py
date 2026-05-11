@@ -48,6 +48,29 @@ def normalize_whitespace(text: str) -> str:
     return text.strip()
 
 
+def parse_dates_range(dates_raw: str | None) -> dict[str, str] | None:
+    """
+    Map a single resume date line to {start_date, end_date?}.
+    end_date is omitted for ongoing roles (e.g. 'Present') or when only one segment exists.
+    """
+    if not dates_raw:
+        return None
+    s = normalize_whitespace(str(dates_raw))
+    if not s:
+        return None
+    ongoing = frozenset({"present", "current", "now", "today"})
+    for sep in (" – ", " — ", " - ", "\u2013", "\u2014"):
+        if sep in s:
+            a, b = [p.strip() for p in s.split(sep, 1)]
+            if not a:
+                return None
+            out: dict[str, str] = {"start_date": a}
+            if b and b.lower() not in ongoing:
+                out["end_date"] = b
+            return out
+    return {"start_date": s}
+
+
 def read_pdf_text(path: Path) -> str:
     reader = PdfReader(str(path))
     parts: list[str] = []
@@ -254,15 +277,17 @@ def parse_experiences(block: str, source_pdf_relpath: str, overwrite: bool, out:
             # avoid empty-header junk; fall back to a short derived header
             header = f"Experience {e.get('dates') or ''}".strip()
         item_id = stable_id("experience", header)
+        dates_obj = parse_dates_range(e.get("dates"))
         item = {
             "id": item_id,
             "type": "experience",
             "header": header,
-            "dates": e.get("dates"),
             "bullets": [b for b in e.get("bullets", []) if b],
             "source": {"path": source_pdf_relpath, "kind": "pdf"},
             "updated_at": datetime.now().isoformat(timespec="seconds"),
         }
+        if dates_obj:
+            item["dates"] = dates_obj
         written.append(safe_write_item(out.experiences, item_id, item, overwrite=overwrite))
     return written
 

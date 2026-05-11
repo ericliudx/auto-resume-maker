@@ -1,5 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 type LlmChatRequest = {
   system: string
@@ -7,6 +9,18 @@ type LlmChatRequest = {
   model?: string
   temperature?: number
 }
+
+type BioBankResponse =
+  | {
+      ok: true
+      result: {
+        experiences: unknown[]
+        projects: unknown[]
+        education: unknown[]
+        skills: unknown[]
+      }
+    }
+  | { ok: false; error: { code: 'not_found' | 'bad_request' | 'server_error'; message: string } }
 
 type LlmChatSuccess = {
   ok: true
@@ -245,6 +259,76 @@ function createLlmApiPlugin(env: Record<string, string>): Plugin {
   }
 }
 
+function createBioApiPlugin(): Plugin {
+  const bioRoot = path.resolve(process.cwd(), '..', 'bio')
+
+  async function readJsonDir(dir: string): Promise<unknown[]> {
+    const full = path.join(bioRoot, dir)
+    let names: string[]
+    try {
+      names = await fs.readdir(full)
+    } catch {
+      return []
+    }
+
+    const jsonNames = names.filter((n) => n.toLowerCase().endsWith('.json')).sort()
+    const docs = await Promise.all(
+      jsonNames.map(async (name) => {
+        const p = path.join(full, name)
+        const text = await fs.readFile(p, 'utf8')
+        return JSON.parse(text) as unknown
+      }),
+    )
+    return docs
+  }
+
+  return {
+    name: 'local-bio-api',
+    configureServer(server) {
+      server.middlewares.use('/api/bio/bank', async (req, res) => {
+        try {
+          if (req.method !== 'GET') {
+            res.statusCode = 405
+            res.setHeader('content-type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: false,
+                error: { code: 'bad_request', message: 'Method not allowed.' },
+              } satisfies BioBankResponse),
+            )
+            return
+          }
+
+          const [experiences, projects, education, skills] = await Promise.all([
+            readJsonDir('experiences'),
+            readJsonDir('projects'),
+            readJsonDir('education'),
+            readJsonDir('skills'),
+          ])
+
+          res.statusCode = 200
+          res.setHeader('content-type', 'application/json')
+          res.end(
+            JSON.stringify({
+              ok: true,
+              result: { experiences, projects, education, skills },
+            } satisfies BioBankResponse),
+          )
+        } catch {
+          res.statusCode = 500
+          res.setHeader('content-type', 'application/json')
+          res.end(
+            JSON.stringify({
+              ok: false,
+              error: { code: 'server_error', message: 'Failed to read bio bank.' },
+            } satisfies BioBankResponse),
+          )
+        }
+      })
+    },
+  }
+}
+
 function readBody(req: import('http').IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -266,6 +350,6 @@ function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
-    plugins: [react(), createLlmApiPlugin(env)],
+    plugins: [react(), createLlmApiPlugin(env), createBioApiPlugin()],
   }
 })
