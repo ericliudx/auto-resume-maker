@@ -1,0 +1,52 @@
+Eric Liu 
+ Moorestown, NJ | 856-581-1068 | ericdongxuliu@gmail.com | Linkedin 
+ EDUCATION 
+ Rutgers University 
+ Master of Science Candidate, Systems Engineering, GPA: 3.75 
+ Bachelor of Arts, Math, Computer Science, and Cognitive Science, GPA: 3.53 
+ Sep 2024 – May 2026 
+ Sep 2022 – Jan 2026 
+ ● Finishing 4 majors in 4 years at Master and Bachelor level 
+ ● Broad, interdisciplinary learner with curiosity to connect technical, analytical, and human-centered perspectives 
+ ● Relevant Courses: Project Management, Quality Engineering, Reliability Engineering, Data Analytics 
+ EXPERIENCE 
+ Eatery Passion Project | Community Food Service Platform 
+ Founder, CTO | Product Management, React 
+ Jun 2024 – Present 
+ ● Launched a food service platform with peers who shared a passion for cooking which included serving weekly 
+ meals with diverse menus as well as ensuring customer satisfaction with appropriate hospitality 
+ ● Developed and leveraged React and mySQL to create front and back ends for a web app, including features such 
+ as mobile ordering and rewards system, to expand accessibility and reach and grow consumer retention 
+ ● Led team of fifteen staff members by managing schedules and designing menus for up to thirty customers a week, 
+ ensuring alignment and unity within team through clear communication and details 
+ BST Shanghai | Data Analytics Platform in Healthcare 
+ Software Engineering Intern | Node.js, Python, RESTful API 
+ Jun 2023 – Aug 2023 
+ ● Collaborated with colleagues during an internship for a consulting company in Shanghai with primary focus on 
+ developing and implementing an incentives program for US plasma donation company 
+ ● Architected and built a scalable backend using Node.js, Express, and MongoDB to manage donor user profiles, 
+ transaction history, and rewards, implementing RESTful APIs to ensure stability in data models and accurate 
+ recording of donor information for healthcare clients 
+ ● Leveraged Python and statistical analysis of US Census and industry data to engineer a predictive pricing engine 
+ for compensation to plasma donors in US healthcare facilities, thus optimizing compensation rates 
+ Quantitative Development Lab | Cognitive Research Group 
+ Research Assistant | Data Analytics, R, Excel 
+ Jan 2023 – May 2023 
+ ● Supported Quantitative Development Lab with a project focused on understanding what stages of childhood 
+ development include comprehension of mathematical ratios by providing support in data gathering and analysis 
+ ● Contributed to project documentation and team reports, improving workflow clarity and reproducibility for future 
+ research assistants for the project 
+ PROJECTS 
+ AI-Powered Tutoring Platform | Project Management, Technical Leadership 2025 
+ ● Led end-to-end development of an intelligent tutoring platform, coordinating feature planning, timelines, and 
+ cross-functional implementation 
+ ● Managed integration of Gemini API capabilities for dynamic question generation, ensuring alignment between 
+ user requirements, technical feasibility, and delivery milestones 
+ Solar Parking Lot Project | Project Management, App Development, Jira 2025 
+ ● Applied project management principles to a sustainability initiative focused on developing a parking lot with 
+ smart sensors for available spaces and charging stations fueled by solar panel technology 
+ ● Built development roadmap in Jira, outlining milestones, task dependencies, and feature delivery schedule 
+ SKILLS 
+ Technical: Java, Python, JavaScript, HTML, CSS, SAS, C, Pytorch, SQL, R, Jira 
+ Leadership: Church fellowship leader of 200+ students 
+ Others: Fluent in Chinese, Conversational Korean, Self-taught guitar player

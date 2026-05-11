@@ -1,0 +1,15 @@
+{
+  "id": "solar_parking_lot",
+  "type": "project",
+  "name": "Solar Parking Lot Project",
+  "dates": "2025",
+  "header": "Solar Parking Lot Project | Project Management, App Development, Jira 2025",
+  "bullets": [
+    "Applied project management principles to a sustainability initiative focused on developing a parking lot with smart sensors for available spaces and charging stations fueled by solar panel technology.",
+    "Built a development roadmap in Jira, outlining milestones, task dependencies, and a feature delivery schedule."
+  ],
+  "source": {
+    "path": "bio/existing-stuff/extracted/Eric_Liu_resume copy 2.txt",
+    "kind": "pdf_text_extract"
+  }
+}

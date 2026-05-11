@@ -1,23 +1,30 @@
 {
   "id": "education_deed693ac39f",
   "type": "education",
+  "institution": "Rutgers University",
   "entries": [
     {
-      "raw": "Rutgers University Master of Science Candidate, Industrial and Systems Engineering, GPA: 3.75 Bachelor of Arts, Math, Computer Science, and Cognitive Science, GPA: 3.53"
+      "id": "rutgers_ba_triple_major",
+      "degree": "Bachelor of Arts",
+      "majors": ["Mathematics", "Computer Science", "Cognitive Science"],
+      "gpa": 3.53,
+      "dates": {
+        "start": "2022-09",
+        "end": "2026-01"
+      }
     },
     {
-      "raw": "Sep 2024 – May 2026 Sep 2022 – Jan 2026"
-    },
-    {
-      "raw": "Finishing 4 majors in 4 years at Master and Bachelor level"
-    },
-    {
-      "raw": "Focused on AI/ML modeling and systems thinking, bridging technical methods with real-world applications"
-    },
-    {
-      "raw": "Relevant Courses: Reliability Engineering, Computational Game Theory, Data Analytics, Project Management"
+      "id": "rutgers_ms_industrial_systems_engineering",
+      "degree": "Master of Science",
+      "field": "Industrial and Systems Engineering",
+      "gpa": 3.75,
+      "dates": {
+        "start": "2024-09",
+        "end": "2026-05"
+      }
     }
   ],
+  "course_bank_ref": "bio/education/relevant-courses.json",
   "source": {
     "path": "bio/existing-stuff/Eric_Liu_resume copy 3.pdf",
     "kind": "pdf"

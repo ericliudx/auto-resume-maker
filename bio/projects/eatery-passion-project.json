@@ -1,0 +1,16 @@
+{
+  "id": "eatery_passion_project",
+  "type": "project",
+  "name": "Eatery Passion Project (Community Food Service Platform)",
+  "role": "Founder, CTO",
+  "dates": "Jun 2024 – Present",
+  "bullets": [
+    "Launched a food service platform with peers who shared a passion for cooking, serving weekly meals with diverse menus and maintaining high customer satisfaction through hospitality and execution.",
+    "Built a web app using React and MySQL to support operations and customer experience, including features like mobile ordering and a rewards system to improve accessibility and retention.",
+    "Led a 15-person team by managing schedules and designing menus for up to 30 customers per week, aligning the team through clear communication and attention to detail."
+  ],
+  "source": {
+    "path": "bio/existing-stuff/Eric_Liu_resume copy 3.pdf",
+    "kind": "pdf"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "march_madness",
+  "type": "project",
+  "name": "March Madness Project",
+  "dates": "2024",
+  "header": "March Madness Project | Data Mining, Hyperparameter Tuning 2024",
+  "bullets": [
+    "Applied Pandas and PyTorch to project 2024 March Madness bracket results prior to finalization of the tournament schedule.",
+    "Implemented hierarchical classification models and feature-importance analysis, achieving a weighted macro-average F1-score of 0.78."
+  ],
+  "source": {
+    "path": "bio/existing-stuff/extracted/Eric_Liu_resume copy 4.txt",
+    "kind": "pdf_text_extract"
+  }
+}

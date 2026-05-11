@@ -1,0 +1,53 @@
+Eric Liu 
+ Moorestown, NJ | 856-581-1068 | ericdongxuliu@gmail.com | Linkedin 
+ EDUCATION 
+ Rutgers University 
+ Master of Science Candidate, Systems Engineering, GPA: 3.75 
+ Bachelor of Arts, Math, Computer Science, and Cognitive Science, GPA: 3.53 
+ Sep 2024 – May 2026 
+ Sep 2022 – Jan 2026 
+ ● Finishing 4 majors in 4 years at Master and Bachelor level 
+ ● Focused on systems thinking: connecting engineering, data analytics, software design, and human cognition to 
+ understand how complex systems operate 
+ ● Relevant Courses: Data Science, Data Mining, Language and Cognition, Project Management, Deep Learning 
+ EXPERIENCE 
+ Eatery Passion Project | Community Food Service Platform 
+ Founder, CTO | Product Management, React 
+ Jun 2024 – Present 
+ ● Launched a food service platform with peers who shared a passion for cooking which included serving weekly 
+ meals with diverse menus as well as ensuring customer satisfaction with appropriate hospitality 
+ ● Developed and leveraged React and mySQL to create front and back ends for a web app, including features such 
+ as mobile ordering and rewards system, to expand accessibility and reach and grow consumer retention 
+ ● Led team of fifteen staff members by managing schedules and designing menus for up to thirty customers a week, 
+ ensuring alignment and unity within team through clear communication and details 
+ BST Shanghai | Data Analytics Platform in Healthcare 
+ Software Engineering Intern | Node.js, Python, RESTful API 
+ Jun 2023 – Aug 2023 
+ ● Collaborated with colleagues during an internship for a consulting company in Shanghai with primary focus on 
+ developing and implementing an incentives program for a US plasma donation company 
+ ● Architected and built a scalable backend using Node.js, Express, and MongoDB to manage donor user profiles, 
+ transaction history, and rewards, implementing RESTful APIs to ensure stability in data models 
+ Quantitative Development Lab | Cognitive Research Group 
+ Research Assistant | Data Analytics, R, Excel 
+ Jan 2023 – May 2023 
+ ● Supported Quantitative Development Lab with a project focused on understanding what stages of childhood 
+ development include comprehension of probability by providing support in initial data gathering and analysis 
+ ● Contributed to project documentation and team reports, improving workflow clarity and reproducibility for future 
+ research assistants for the project 
+ PROJECTS 
+ AI-Driven Tutoring Platform | Full-Stack Software Engineering, Gemini API Integration 2025 
+ ● Designed and built a production-grade tutoring platform with end-to-end workflows for course content, quizzes, 
+ and user progress tracking 
+ ● Integrated Gemini API calls to generate adaptive questions and explanations, implementing robust error-handling, 
+ caching, and request-throughput controls 
+ ● Developed scalable backend services using Next.js, Prisma, and PostgreSQL, including RESTful API routes, 
+ schema design, and secure authentication 
+ March Madness Project | Data Mining, Hyperparameter Tuning 2024 
+ ● Applied Pandas and PyTorch to March Madness tournament in 2024 to project bracket results prior to finalization 
+ of tournament schedule 
+ ● Implemented hierarchical classification models and feature importance analysis, achieving a weighted 
+ macro-average F1-score of 0.78 
+ SKILLS 
+ Technical: Java, Python, JavaScript, HTML, CSS, SAS, C, Pytorch, SQL, R, Jira 
+ Leadership: Church fellowship leader of 200+ students 
+ Others: Fluent in Chinese, Conversational Korean, Self-taught guitar player
