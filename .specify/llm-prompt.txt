@@ -1,0 +1,30 @@
+# Reusable prompt: feature work (local dev)
+
+Copy this block and fill the bracketed sections. Keep scope local (this machine / LAN).
+
+---
+
+## Goal
+[One sentence: what should work when finished?]
+
+## Non-goals
+[Explicitly out of scope: cloud deploy, multi-tenant, etc.]
+
+## Affected areas
+[Packages, files, or subsystems—use TODO if unknown until architecture is updated.]
+
+## Spec artifacts (create under features/in-progress/<kebab-case-name>/)
+1. spec.md — Behavior, main flows, edge cases, invariants, non-goals.
+2. plan.md — Technical approach, file/module touch list, **local verification steps** (how to run, how to test on this machine).
+3. tasks.md — Checkbox checklist aligned with plan.md.
+
+## Optional: api-shapes.md
+Add when request/response shapes, CLI flags, or file formats are part of the contract—even if only consumed locally.
+
+## Local verification
+- Run: [TODO: e.g. command from architecture/index.md]
+- Test: [TODO: e.g. unit/integration/lint command]
+- Done means: [Observable outcome on this machine]
+
+## Remember
+- No secrets in repo; follow memory/constitution.md and memory/coding-rules.md.
