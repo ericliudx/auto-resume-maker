@@ -43,6 +43,13 @@ As a user working locally, I want to paste (or upload) a job description and gen
   - Locking/boosting specific experiences or projects (optional)
 - The preview updates deterministically from the same inputs.
 
+### Paste-and-apply tailor plan (deterministic)
+
+- The user can paste a short “tailor plan” block generated outside the app (e.g. in Cursor).
+- The app parses the plan and applies a **deterministic** selection + ordering of experiences/projects based on keyword overlap with the job posting.
+- This deterministic plan application must not require an LLM call; it produces a derived resume view and persists it locally so print matches.
+- Tailor plan generation should also produce a “biggest gaps” summary (top missing keywords + missing signals + recommended next edits).
+
 ## Edge cases / invariants
 
 - **Local-only**: All flows run on this machine/LAN; no hosted assumptions.

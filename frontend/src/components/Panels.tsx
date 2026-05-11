@@ -14,7 +14,7 @@ export function Panel({
   ariaLabel: string
 }) {
   return (
-    <section className="flex flex-col min-h-0 min-w-0" aria-label={ariaLabel}>
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label={ariaLabel}>
       <div className="px-4 pt-3.5 pb-2.5 border-b border-[var(--border)]">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -38,6 +38,8 @@ export function PanelBody({
   children: React.ReactNode
   className?: string
 }) {
-  return <div className={['min-h-0 min-w-0 flex-1', className ?? ''].join(' ')}>{children}</div>
+  return (
+    <div className={['flex min-h-0 min-w-0 flex-1 flex-col', className ?? ''].join(' ')}>{children}</div>
+  )
 }
 

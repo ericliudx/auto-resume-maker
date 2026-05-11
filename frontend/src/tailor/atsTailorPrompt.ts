@@ -5,7 +5,6 @@ export function buildAtsTailorPrompt(args: {
   jobText: string
   bank: BioBank
   missingKeywords: string[]
-  truthAddendum?: string
 }): string {
   const jobText = args.jobText.trim()
   const missing = args.missingKeywords
@@ -21,18 +20,21 @@ export function buildAtsTailorPrompt(args: {
     'Only use keywords that are supported by the bank content. If a keyword is not supported, put it in `cannotAdd` with a reason.',
     '',
     'Hard requirements:',
-    '- Select EXACTLY 3 experiences and EXACTLY 3 projects (experienceIds/projectIds length must be 3).',
-    '- For EACH selected experience/project: return rewritten bullets (max 3 bullets each).',
+    '- Select experiences and projects by relevance (typically 2 to 5 each; use fewer if the bank is small). Include at least 1 experience and 1 project when the bank has any.',
+    '- For EACH selected experience/project: return rewritten bullets (1 to 3 bullets each; never use 0 bullets for a selected item).',
+    '- In all resume-facing strings: no em dashes, en-dash punctuation, or arrows; use commas, the word to, or a plain hyphen (-).',
     '- Try to incorporate as many of the provided missing keywords as truthfully possible.',
     '- Include a `keywordMap` entry for each keyword you successfully placed (where you placed it).',
+    '- Optional: include top-level `pdfFileName` as `First_Last_Company` (ASCII, underscores, at least three segments, e.g. Eric_Liu_Affirm) for the print/PDF filename.',
     '',
     'Missing keywords to target (in priority order):',
     missing.length ? missing.join(', ') : '(none)',
     '',
     'Output JSON shape:',
     '{',
-    '  "experienceIds": ["<id>", "<id>", "<id>"],',
-    '  "projectIds": ["<id>", "<id>", "<id>"],',
+    '  "experienceIds": ["<id>", "..."],',
+    '  "projectIds": ["<id>", "..."],',
+    '  "pdfFileName": "First_Last_Company",',
     '  "experiences": [{"id":"<id>","bullets":["..."]}],',
     '  "projects": [{"id":"<id>","bullets":["..."]}],',
     '  "keywordMap": [{"keyword":"<k>","target":"experience|project","id":"<id>","bulletIndex":0}],',
@@ -41,9 +43,6 @@ export function buildAtsTailorPrompt(args: {
     '',
     'Job posting:',
     jobText,
-    '',
-    'Truth addendum (user-provided; treat as factual):',
-    (args.truthAddendum ?? '').trim() || '(none)',
     '',
     'Bank JSON (slim):',
     JSON.stringify(makeBankForPrompt(args.bank)),
