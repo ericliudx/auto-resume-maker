@@ -58,10 +58,12 @@ export function ResumeFitter({
   bank,
   contact,
   target,
+  onFit,
 }: {
   bank: BioBank
   contact: ResumeContact
   target: 'screen' | 'print'
+  onFit?: (info: { cfg: FitConfig; fittedBank: BioBank }) => void
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [cfg, setCfg] = useState<FitConfig>(() => ({
@@ -72,6 +74,10 @@ export function ResumeFitter({
   }))
 
   const fittedBank = useMemo(() => applyFit(bank, cfg), [bank, cfg])
+
+  useLayoutEffect(() => {
+    onFit?.({ cfg, fittedBank })
+  }, [cfg, fittedBank, onFit])
 
   useLayoutEffect(() => {
     const el = containerRef.current

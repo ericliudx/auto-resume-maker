@@ -5,7 +5,6 @@ export function buildAtsTailorPrompt(args: {
   jobText: string
   bank: BioBank
   missingKeywords: string[]
-  truthAddendum?: string
 }): string {
   const jobText = args.jobText.trim()
   const missing = args.missingKeywords
@@ -41,9 +40,6 @@ export function buildAtsTailorPrompt(args: {
     '',
     'Job posting:',
     jobText,
-    '',
-    'Truth addendum (user-provided; treat as factual):',
-    (args.truthAddendum ?? '').trim() || '(none)',
     '',
     'Bank JSON (slim):',
     JSON.stringify(makeBankForPrompt(args.bank)),

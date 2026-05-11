@@ -26,6 +26,14 @@
   - Extracts a ranked keyword/skill phrase list from the job posting
   - Scores coverage against the current resume content (covered vs missing)
   - Makes “what to fix next” obvious (top missing terms)
+- Add a “tailor plan” paste box that:
+  - Parses a small text block (role, keyword limit, must-include IDs, force-keywords)
+  - Applies a deterministic selection + ordering patch (no LLM) using keyword overlap
+  - Persists the patch locally so print matches the preview
+- When generating a plan outside the app, also output a short “biggest gaps” section:
+  - Top missing ATS keywords for this posting (given the proposed plan)
+  - Missing signals (e.g. deploy/monitor/reliability phrasing) that are not well supported by the current bank
+  - Suggested next edits (skills/courses/bullets) to close the gap
 - Implement a deterministic “tailor request builder” that:
   - Builds the LLM prompt using the job description + selected bank entries
   - Explicitly instructs the model to avoid fabrications and to preserve factual fields
@@ -64,4 +72,6 @@ Manual checks:
 - One-page fit mode reduces content (by trimming/condensing) rather than changing global CSS.
 - ATS match report is computed and shows covered/missing keywords and a score.
 - ATS-tailor increases the score (or visibly increases coverage of top missing keywords) without introducing fabricated claims.
+- Pasted tailor plans apply deterministically (same inputs → same selection/order) and do not require LLM access.
+- “Biggest gaps” output is included alongside pasted plans so the user knows what to fix next.
 
