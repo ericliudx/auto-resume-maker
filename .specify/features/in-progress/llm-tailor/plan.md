@@ -22,10 +22,18 @@
   - Job description text
   - Optional fit settings (e.g. one-page fit on/off)
   - Optional “lock/boost” selections for experiences/projects (if already supported by UI state patterns)
+- Add an ATS match report that:
+  - Extracts a ranked keyword/skill phrase list from the job posting
+  - Scores coverage against the current resume content (covered vs missing)
+  - Makes “what to fix next” obvious (top missing terms)
 - Implement a deterministic “tailor request builder” that:
   - Builds the LLM prompt using the job description + selected bank entries
   - Explicitly instructs the model to avoid fabrications and to preserve factual fields
   - Requests structured output (e.g. JSON) so the app can map it back into the resume template
+- Implement an “ATS-tailor” prompt mode that:
+  - Inputs the top missing keywords
+  - Requires the model to return a `keywordMap` showing where each keyword was placed
+  - Requires `cannotAdd` for keywords that would be fabrication
 - Map the model output into the existing resume rendering pipeline:
   - Keep the template fixed; only swap in the tailored content fields.
 - Use (or extend) the existing resume fit logic to meet one-page constraints:
@@ -54,4 +62,6 @@ Manual checks:
 - Tailoring does not write to `bio/` (no file changes under `bio/` after runs).
 - Template structure stays locked (section order/headings unchanged).
 - One-page fit mode reduces content (by trimming/condensing) rather than changing global CSS.
+- ATS match report is computed and shows covered/missing keywords and a score.
+- ATS-tailor increases the score (or visibly increases coverage of top missing keywords) without introducing fabricated claims.
 
