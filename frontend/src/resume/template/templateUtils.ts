@@ -45,7 +45,7 @@ export function formatBioDateRangeCompact(d: BioDateRange | undefined): string {
   const e = eRaw ? formatDateToken(eRaw) : undefined
   if (!s) return e ?? ''
   if (!e) return `${s} to present`
-  return `${s} – ${e}`
+  return `${s} - ${e}`
 }
 
 export function parseHeaderPipe(header: string | undefined): { left?: string; right?: string } {

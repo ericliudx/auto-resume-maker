@@ -39,11 +39,11 @@ export function validateTailorResult(args: {
   if (badExp.length) return { ok: false, message: `Model used unknown experienceIds: ${badExp.join(', ')}` }
   if (badProj.length) return { ok: false, message: `Model used unknown projectIds: ${badProj.join(', ')}` }
 
-  // Default to the visible “top 3” to make differences obvious.
+  const MAX_IDS = 12
   const normalized: TailorModelResult = {
     ...result,
-    experienceIds: expIds.slice(0, 3),
-    projectIds: projIds.slice(0, 3),
+    experienceIds: expIds.slice(0, MAX_IDS),
+    projectIds: projIds.slice(0, MAX_IDS),
   }
 
   const expPatchIds = new Set((normalized.experiences ?? []).map((e) => e.id))
