@@ -1,4 +1,4 @@
-import type { ResumeContact } from './contact'
+import type { ResumeContact } from '../data/contact'
 
 type ContactResponse =
   | { ok: true; result: ResumeContact }

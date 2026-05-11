@@ -1,4 +1,4 @@
-import type { BioBank, BioBankResponse } from './bioTypes'
+import type { BioBank, BioBankResponse } from '../data/bioTypes'
 
 export async function fetchBioBank(): Promise<BioBank> {
   const res = await fetch('/api/bio/bank', { cache: 'no-store' })

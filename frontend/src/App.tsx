@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import './App.css'
-import { ResumePreview } from './resume/ResumePreview'
-import { SuperResumePreview } from './resume/SuperResumePreview'
+import { ResumePreview } from './resume/views/ResumePreview'
+import { SuperResumePreview } from './resume/views/SuperResumePreview'
+import { AppHeader } from './components/AppHeader'
+import { Panel, PanelBody } from './components/Panels'
+import { SegmentedTabs } from './components/SegmentedTabs'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
 
@@ -84,88 +86,85 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header__title">
-          <div className="appName">auto-resume</div>
-          <div className="appSubtitle">Local resume preview + job posting input</div>
-        </div>
-        <div className="header__meta">
-          <div className="metaPill">
-            Job posting: {jobPostingStats.lines} lines · {jobPostingStats.chars} chars
-          </div>
-        </div>
-      </header>
+    <div className="w-[1126px] max-w-full mx-auto min-h-[100svh] flex flex-col box-border border-x border-[var(--border)]">
+      <AppHeader meta={`Job posting: ${jobPostingStats.lines} lines · ${jobPostingStats.chars} chars`} />
 
-      <main className="grid" aria-label="Resume and job posting workspace">
-        <section className="panel" aria-label="Resume viewer">
-          <div className="panel__header">
-            <div className="panel__headerRow">
-              <div>
-                <h2 className="panel__title">Resume</h2>
-                <div className="panel__hint">Locked template (stable structure)</div>
-              </div>
-              <div className="tabs" role="tablist" aria-label="Resume views">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={resumeView === 'resume'}
-                  className={`tab ${resumeView === 'resume' ? 'tab--active' : ''}`}
-                  onClick={() => setResumeView('resume')}
-                >
-                  Resume
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={resumeView === 'super'}
-                  className={`tab ${resumeView === 'super' ? 'tab--active' : ''}`}
-                  onClick={() => setResumeView('super')}
-                >
-                  Super-resume
-                </button>
+      <main
+        className="grid grid-cols-[minmax(0,1.7fr)_minmax(0,0.3fr)] flex-1 min-h-0"
+        aria-label="Resume and job posting workspace"
+      >
+        <Panel
+          ariaLabel="Resume viewer"
+          title="Resume"
+          hint="Locked template (stable structure)"
+          right={
+            <SegmentedTabs
+              ariaLabel="Resume views"
+              value={resumeView}
+              onChange={(v) => setResumeView(v)}
+              tabs={[
+                { id: 'resume', label: 'Resume' },
+                { id: 'super', label: 'Super-resume' },
+              ]}
+            />
+          }
+        >
+          <PanelBody>
+            <div className="h-full min-h-0 min-w-0 m-0 px-4 py-3.5 overflow-auto overflow-y-scroll [scrollbar-gutter:stable_both-edges] bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]">
+              <div className="origin-top [transform:scale(0.88)]">
+                {resumeView === 'resume' ? <ResumePreview mode="app" /> : <SuperResumePreview />}
               </div>
             </div>
-          </div>
-          <div className="resumeViewer">
-            {resumeView === 'resume' ? <ResumePreview mode="app" /> : <SuperResumePreview />}
-          </div>
-        </section>
+          </PanelBody>
+        </Panel>
 
-        <section className="panel" aria-label="Job posting input">
-          <div className="panel__header">
-            <h2 className="panel__title">Job posting</h2>
-            <div className="panel__hint">Saved to this browser (localStorage)</div>
-          </div>
-          <textarea
-            className="jobPosting"
-            value={jobPostingText}
-            onChange={(e) => setJobPostingText(e.target.value)}
-            placeholder="Paste the job posting here…"
-            spellCheck={false}
-          />
-        </section>
+        <div className="border-l border-[var(--border)]">
+          <Panel
+            ariaLabel="Job posting input"
+            title="Job posting"
+            hint="Saved to this browser (localStorage)"
+          >
+            <PanelBody>
+              <textarea
+                className="h-full w-full box-border border-0 m-0 px-4 py-3.5 resize-none outline-none overflow-y-scroll [scrollbar-gutter:stable_both-edges] bg-[var(--bg)] text-[var(--text-h)] font-mono text-[13px] leading-[1.45]"
+                value={jobPostingText}
+                onChange={(e) => setJobPostingText(e.target.value)}
+                placeholder="Paste the job posting here…"
+                spellCheck={false}
+              />
+            </PanelBody>
+          </Panel>
+        </div>
       </main>
 
-      <section className="panel" aria-label="LLM smoke test">
-        <div className="panel__header">
-          <h2 className="panel__title">LLM smoke test</h2>
-          <div className="panel__hint">
-            Calls local `POST /api/llm/chat` (Groq key stays server-side)
-          </div>
-        </div>
+      <div className="border-t border-[var(--border)]">
+        <Panel
+          ariaLabel="LLM smoke test"
+          title="LLM smoke test"
+          hint={
+            <>
+              Calls local <code className="px-1 py-0.5 rounded bg-[var(--code-bg)]">POST /api/llm/chat</code> (Groq key stays server-side)
+            </>
+          }
+        >
+          <PanelBody className="px-4 py-3.5">
+            <div className="flex gap-3 items-center">
+              <button
+                onClick={runLlmSmokeTest}
+                disabled={llmLoading}
+                className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--social-bg)] text-[var(--text-h)] text-xs leading-none disabled:opacity-60"
+              >
+                {llmLoading ? 'Running…' : 'Run'}
+              </button>
+              {llmError ? <div className="text-[#b91c1c] text-xs">{llmError}</div> : null}
+            </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button onClick={runLlmSmokeTest} disabled={llmLoading}>
-            {llmLoading ? 'Running…' : 'Run'}
-          </button>
-          {llmError ? <div style={{ color: '#b91c1c' }}>{llmError}</div> : null}
-        </div>
-
-        {llmOutput ? (
-          <pre style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{llmOutput}</pre>
-        ) : null}
-      </section>
+            {llmOutput ? (
+              <pre className="whitespace-pre-wrap mt-3 text-xs text-[var(--text-h)]">{llmOutput}</pre>
+            ) : null}
+          </PanelBody>
+        </Panel>
+      </div>
     </div>
   )
 }

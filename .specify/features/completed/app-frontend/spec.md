@@ -19,6 +19,7 @@ So that future tailoring/page-fit features have an obvious place to plug in.
 - The viewer supports switching between:
   - **Resume**: the fitted 1-page-ish preview (default)
   - **Super-resume**: an untrimmed view listing **all** experiences and projects for manual verification
+- The resume preview is shown in an app-only “page view” that may be **visually scaled** for easier side-by-side viewing. Print/PDF output is not affected.
 
 ### Paste job posting
 
@@ -37,6 +38,7 @@ So that future tailoring/page-fit features have an obvious place to plug in.
 
 - The experience bank under `bio/` remains the canonical source of truth for source material (see `.specify/vision.md`).
 - This feature is only a frontend shell; it must not silently introduce domain rules into UI code (domain stays domain, per `.specify/architecture/index.md` boundaries).
+- The locked resume template styling remains stable; app-shell styling can be refactored independently.
 
 ## Non-goals / out of scope (for this feature)
 

@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchBioBank } from './bioApi'
-import type { BioBank } from './bioTypes'
-import { loadContact, type ResumeContact } from './contact'
-import { fetchContactFile } from './contactApi'
-import { ResumeTemplate } from './ResumeTemplate'
+import { fetchBioBank } from '../api/bioApi'
+import type { BioBank } from '../data/bioTypes'
+import { loadContact, type ResumeContact } from '../data/contact'
+import { fetchContactFile } from '../api/contactApi'
 
-export function SuperResumePreview() {
+export function useResumeData(): {
+  bank: BioBank | null
+  contact: ResumeContact
+  error: string
+  loading: boolean
+} {
   const [bank, setBank] = useState<BioBank | null>(null)
   const [error, setError] = useState<string>('')
   const [contact, setContact] = useState<ResumeContact>(() => loadContact())
@@ -37,17 +41,6 @@ export function SuperResumePreview() {
     }
   }, [])
 
-  const view = useMemo(() => {
-    if (!bank) return null
-    return <ResumeTemplate bank={bank} contact={contact} />
-  }, [bank, contact])
-
-  return (
-    <div>
-      {error ? <div className="resumePane__error">{error}</div> : null}
-      {!bank && !error ? <div className="resumeCanvas__loading">Loading…</div> : null}
-      {view}
-    </div>
-  )
+  return useMemo(() => ({ bank, contact, error, loading: !bank && !error }), [bank, contact, error])
 }
 
