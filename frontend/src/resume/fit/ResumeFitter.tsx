@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { BioBank, BioExperience, BioProject } from './bioTypes'
-import type { ResumeContact } from './contact'
-import { ResumeTemplate } from './ResumeTemplate'
+import type { BioBank, BioExperience, BioProject } from '../data/bioTypes'
+import type { ResumeContact } from '../data/contact'
+import { ResumeTemplate } from '../ResumeTemplate'
 
 type FitConfig = {
   expLimit: number

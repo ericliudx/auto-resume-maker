@@ -21,7 +21,7 @@
 
 ## File ownership / boundaries
 - `frontend/vite.config.ts`: local-only API middleware (adapter).
-- `frontend/src/resume/*`: template + render logic (UI/domain-ish).
+- `frontend/src/resume/`: resume template + render logic (organized into `api/`, `data/`, `hooks/`, `views/`, `fit/`, `styles/`, `ui/`, and `template/`).
 - `bio/`: source material on disk (human edited).
 
 ## Verification (local)
