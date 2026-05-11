@@ -10,10 +10,12 @@ import { useLlmTools } from './hooks/useLlmTools'
 import { useAtsMatch } from './hooks/useAtsMatch'
 import type { AtsRole } from './ats/keywordExtract'
 import { useLocalStorageNumberState } from './hooks/useLocalStorageNumberState'
+import { parseTailorPlan } from './tailor/parseTailorPlan'
 
 const JOB_POSTING_STORAGE_KEY = 'auto-resume.jobPosting.v1'
 const ATS_ROLE_STORAGE_KEY = 'auto-resume.atsRole.v1'
 const ATS_KEYWORD_LIMIT_STORAGE_KEY = 'auto-resume.atsKeywordLimit.v1'
+const TAILOR_PLAN_STORAGE_KEY = 'auto-resume.tailorPlanText.v1'
 
 function App() {
   const isPrint = new URLSearchParams(window.location.search).get('print') === '1'
@@ -28,6 +30,7 @@ function App() {
     runLlmSmokeTest,
     tailorResume,
     atsTailorResume,
+    applyDeterministicPlan,
     clearTailor,
   } = useLlmTools()
   const { atsLoading, atsError, report, missingTop, detectedRole, analyze } = useAtsMatch()
@@ -37,6 +40,8 @@ function App() {
     25,
     { min: 10, max: 60 },
   )
+  const [planText, setPlanText] = useLocalStorageState(TAILOR_PLAN_STORAGE_KEY, '')
+  const [planError, setPlanError] = useState<string>('')
 
   useEffect(() => {
     if (!isPrint) return
@@ -121,6 +126,25 @@ function App() {
         hasTailoredBank={Boolean(tailoredBank)}
         onRunSmokeTest={() => runLlmSmokeTest(jobPostingText)}
         onTailor={() => tailorResume(jobPostingText)}
+        planText={planText}
+        planError={planError}
+        onChangePlanText={(t) => {
+          setPlanText(t)
+          setPlanError('')
+        }}
+        onApplyPlan={async () => {
+          const parsed = parseTailorPlan(planText)
+          if (parsed.ok === false) {
+            setPlanError(parsed.error)
+            return
+          }
+          setPlanError('')
+          await applyDeterministicPlan({ jobPostingText, plan: parsed.plan })
+          // Also sync ATS controls to match the plan so Analyze ATS aligns.
+          setAtsRole(parsed.plan.role)
+          setAtsKeywordLimit(parsed.plan.keywordLimit)
+          await analyze({ jobPostingText, role: parsed.plan.role, limit: parsed.plan.keywordLimit })
+        }}
         atsLoading={atsLoading}
         atsError={atsError}
         atsScore={report?.score ?? null}

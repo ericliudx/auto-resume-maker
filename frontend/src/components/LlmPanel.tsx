@@ -27,6 +27,10 @@ export function LlmPanel({
   hasTailoredBank,
   onRunSmokeTest,
   onTailor,
+  planText,
+  planError,
+  onChangePlanText,
+  onApplyPlan,
   atsLoading,
   atsScore,
   atsMissingTop,
@@ -46,6 +50,10 @@ export function LlmPanel({
   hasTailoredBank: boolean
   onRunSmokeTest: () => void
   onTailor: () => void
+  planText: string
+  planError: string
+  onChangePlanText: (next: string) => void
+  onApplyPlan: () => void
   atsLoading: boolean
   atsScore: number | null
   atsMissingTop: string[]
@@ -110,6 +118,27 @@ export function LlmPanel({
               Clear
             </button>
             {error ? <div className="text-[#b91c1c] text-xs">{error}</div> : null}
+          </div>
+
+          <div className="mt-3">
+            <div className="text-xs text-[var(--text)] mb-2">Tailor plan (paste from Cursor)</div>
+            <textarea
+              className="w-full h-[96px] resize-none rounded-lg border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-xs font-mono px-2 py-2 outline-none"
+              value={planText}
+              onChange={(e) => onChangePlanText(e.target.value)}
+              placeholder={`TARGET_ROLE: auto\nKEYWORD_LIMIT: 25\nMUST_INCLUDE_EXPERIENCE_IDS: realtorch_listing_qc_tool\nKEYWORDS_TO_FORCE: docker, kubernetes, azure`}
+              spellCheck={false}
+            />
+            <div className="mt-2 flex items-center gap-3">
+              <button
+                onClick={onApplyPlan}
+                disabled={loading}
+                className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--social-bg)] text-[var(--text-h)] text-xs leading-none disabled:opacity-60"
+              >
+                Apply plan (deterministic)
+              </button>
+              {planError ? <div className="text-[#b91c1c] text-xs">{planError}</div> : null}
+            </div>
           </div>
 
           <div className="mt-3 text-xs text-[var(--text-h)]">
