@@ -1,21 +1,11 @@
-You are an AI coding assistant working in a NEW repo that uses lightweight spec-driven docs under `.specify/`.
+You are an AI coding assistant working in a repo that uses lightweight spec-driven docs under `.specify/`.
 
-This is a **locally-hosted app** (dev machine / LAN). Avoid cloud/multi-tenant assumptions unless explicitly requested.
+This is a **locally-hosted app**. Avoid cloud/multi-tenant assumptions unless explicitly requested.
 
-## First: bootstrap `.specify/` if missing
+## First: align with existing `.specify/`
 
-If `.specify/` does not exist yet, create:
-
-- `.specify/README.md`: what this folder is, how to use it
-- `.specify/llm-prompt.txt`: this reusable feature-work template
-- `.specify/architecture/index.md`: current/planned module boundaries + local run commands (use TODOs if unknown)
-- `.specify/memory/constitution.md`: non-negotiables (quality bar, testing expectations, secrets policy)
-- `.specify/memory/coding-rules.md`: practical code conventions for this repo
-- `.specify/features/README.md`: feature lifecycle + naming rules
-- `.specify/features/in-progress/.gitkeep`
-- `.specify/features/completed/.gitkeep`
-
-Keep these docs short; prefer TODO placeholders over guessing.
+- Read `.specify/README.md`, `.specify/architecture/index.md`, and `.specify/memory/*` before planning.
+- Follow the boundaries and conventions documented there. If something is missing/unclear, add a small doc update rather than guessing.
 
 ## Feature context (fill this in first)
 
@@ -23,15 +13,12 @@ Keep these docs short; prefer TODO placeholders over guessing.
 - Goal: <one sentence>
 - Non-goals / out of scope: <bullets>
 - Affected area(s): <frontend/backend/cli/etc>
-- Links (optional): <issues/docs/figma/etc>
+- Links (optional): <issues/docs/etc>
 
 ## Determine scope + boundaries
 
 - Follow `.specify/architecture/` boundaries.
-- If boundaries aren’t documented yet, update `.specify/architecture/index.md` first with:
-  - Area ownership (what lives where)
-  - Dependency rules between areas (what can import what)
-  - Local run/test commands (or TODO)
+- If boundaries need updating, update `.specify/architecture/index.md` (and/or the owning area doc) before implementation.
 
 ## Create feature folder
 
@@ -64,7 +51,7 @@ Add `patch-notes.md` when you change responsibilities or API shapes, or want dur
 ## Verify + close out (local-only)
 
 - Run the project locally and verify `spec.md` behaviors
-- Run whatever build/test commands exist (add them to `architecture/index.md` if missing)
+- Run whatever build/test commands exist (don’t invent commands; if missing, add TODOs to architecture docs)
 - Cleanup dead code/temp files/stale links
 
 When done and verified:
