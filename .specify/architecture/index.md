@@ -1,6 +1,6 @@
 # Architecture map (local runtime)
 
-**Status:** Stack and layout not chosen yet. Replace `TODO` sections after bootstrap.
+**Status:** Frontend bootstrapped (Vite + React). Backend/domain not yet implemented.
 
 **Product context:** See [`vision.md`](../vision.md) (experience **bank**, **tailoring**, **page-fit** output).
 
@@ -8,10 +8,10 @@
 
 | Area | Path / package (TODO) | Responsibility |
 |------|------------------------|----------------|
-| Entry / app shell | `TODO` | How the process starts; wires config and UI or CLI |
-| Core domain | `TODO` | Bank model, tailoring rules, layout/page-fit constraints (names TBD per stack) |
-| Adapters | `TODO` | Persistence (local files/DB), print/PDF or export pipeline—keep thin |
-| Tests | `TODO` | Unit / integration layout for this stack |
+| Entry / app shell | `frontend/` | Local web UI entrypoint and app shell |
+| Core domain | `TODO` | Bank model, tailoring rules, layout/page-fit constraints |
+| Adapters | `TODO` | Disk/persistence, export pipeline, local APIs (keep thin) |
+| Tests | `frontend/` (TBD) | Frontend lint/typecheck now; add tests when behavior warrants |
 
 ## Experience bank on disk
 
@@ -29,16 +29,20 @@
 ## How to run locally
 
 ```text
-TODO: install deps (e.g. package manager + command)
-TODO: dev server or CLI entry (exact command)
-TODO: optional LAN URL or bind address if applicable
+cd frontend
+npm install
+npm run dev
+
+# then open:
+http://localhost:5173/
 ```
 
 ## How to test locally
 
 ```text
-TODO: single command that contributors run before calling a feature “done”
-TODO: lint/typecheck if applicable
+cd frontend
+npm run lint
+npm run build
 ```
 
 ## Optional area docs

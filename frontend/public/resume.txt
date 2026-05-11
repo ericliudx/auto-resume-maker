@@ -1,0 +1,15 @@
+YOUR NAME
+Title · City, ST · email@example.com · github.com/you
+
+SUMMARY
+- Replace this file with the actual resume output later.
+- This viewer intentionally reads from `frontend/public/resume.txt` for now.
+
+EXPERIENCE
+Company — Role (YYYY–YYYY)
+- Impact bullet 1
+- Impact bullet 2
+
+PROJECTS
+Project — Tech
+- What it does
