@@ -31,12 +31,20 @@ function App() {
     llmOutput,
     llmError,
     tailoredBank,
-    runLlmSmokeTest,
     tailorResume,
-    atsTailorResume,
     applyDeterministicPlan,
     clearTailor,
-  } = useLlmTools();
+  } = useLlmTools({
+    onTailorPlanApplied: ({ role, keywordLimit }) => {
+      setAtsRole(role);
+      setAtsKeywordLimit(keywordLimit);
+      void analyze({
+        jobPostingText,
+        role,
+        limit: keywordLimit,
+      });
+    },
+  });
   const { atsLoading, atsError, report, missingTop, detectedRole, analyze } =
     useAtsMatch();
   const [atsRole, setAtsRole] = useLocalStorageState(
@@ -135,8 +143,12 @@ function App() {
         output={llmOutput}
         error={llmError}
         hasTailoredBank={Boolean(tailoredBank)}
-        onRunSmokeTest={() => runLlmSmokeTest(jobPostingText)}
-        onTailor={() => tailorResume(jobPostingText)}
+        onTailor={() =>
+          tailorResume(jobPostingText, {
+            atsRole: atsRole as AtsRole,
+            atsKeywordLimit,
+          })
+        }
         planText={planText}
         planError={planError}
         onChangePlanText={(t) => {
@@ -176,17 +188,6 @@ function App() {
             limit: atsKeywordLimit,
           })
         }
-        onAtsTailor={async () => {
-          await atsTailorResume({
-            jobPostingText,
-            missingKeywords: missingTop,
-          });
-          await analyze({
-            jobPostingText,
-            role: atsRole as AtsRole,
-            limit: atsKeywordLimit,
-          });
-        }}
         onClear={clearTailor}
       />
     </div>

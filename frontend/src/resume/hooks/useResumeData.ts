@@ -4,7 +4,7 @@ import type { BioBank } from "../data/bioTypes";
 import { loadContact, saveContact, type ResumeContact } from "../data/contact";
 import { fetchContactFile } from "../api/contactApi";
 import { loadTailorPatch } from "../../tailor/tailorStorage";
-import { applyTailorResult } from "../../tailor/tailorBank";
+import { applyTailorPatchToBank } from "../../tailor/tailorBank";
 import { sanitizeResumeBank } from "../../tailor/resumeTypography";
 
 function dedupeStrings(xs: string[]): string[] {
@@ -52,7 +52,7 @@ export function useResumeData(): {
     fetchBioBank()
       .then((b) => {
         const patch = loadTailorPatch();
-        const next = normalizeBank(patch ? applyTailorResult(b, patch) : b);
+        const next = normalizeBank(patch ? applyTailorPatchToBank(b, patch) : b);
         if (!cancelled) setBank(next);
       })
       .catch((e: unknown) => {

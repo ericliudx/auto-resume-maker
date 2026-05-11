@@ -1,4 +1,5 @@
 import type { AtsRole } from '../ats/keywordExtract'
+import { capRelevantCoursesList } from './relevantCoursesCap'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
 
@@ -57,7 +58,11 @@ export function parseTailorPlan(
         experiencePatches: Array.isArray(parsed.experiencePatches) ? parsed.experiencePatches : undefined,
         projectPatches: Array.isArray(parsed.projectPatches) ? parsed.projectPatches : undefined,
         skillsGroups: Array.isArray(parsed.skillsGroups) ? parsed.skillsGroups : undefined,
-        relevantCourses: Array.isArray(parsed.relevantCourses) ? parsed.relevantCourses : undefined,
+        relevantCourses: Array.isArray(parsed.relevantCourses)
+          ? capRelevantCoursesList(
+              parsed.relevantCourses.filter((x): x is string => typeof x === 'string'),
+            )
+          : undefined,
       }
       if (pdfFileName) plan.pdfFileName = pdfFileName
       return { ok: true as const, plan }

@@ -1,6 +1,8 @@
 import type { BioBank, BioSkills } from '../resume/data/bioTypes'
+import { MAX_SKILLS_PER_GROUP } from '../resume/skillsCap'
+import { capRelevantCoursesList } from './relevantCoursesCap'
 import type { TailorModelResult } from './tailorTypes'
-import { sanitizeResumeBank } from './resumeTypography'
+import { sanitizeResumeBank, sanitizeResumeTypography } from './resumeTypography'
 
 function normSkillGroupName(s: string): string {
   return s.trim().toLowerCase()
@@ -16,6 +18,8 @@ function mergeSkillsTechnicalOnly(
   const patchTechnical = patchGroups.find((g) => normSkillGroupName(g.name) === 'technical')
   if (!patchTechnical || !Array.isArray(patchTechnical.items)) return baseSkills
 
+  const technicalItems = patchTechnical.items.slice(0, MAX_SKILLS_PER_GROUP)
+
   const baseDoc = baseSkills[0]
   const baseGroups = Array.isArray(baseDoc.groups) ? [...baseDoc.groups] : []
 
@@ -23,11 +27,11 @@ function mergeSkillsTechnicalOnly(
   const mergedGroups = baseGroups.map((g) => {
     if (normSkillGroupName(g.name) !== 'technical') return g
     found = true
-    return { ...g, items: [...patchTechnical.items] }
+    return { ...g, items: [...technicalItems] }
   })
 
   if (!found) {
-    mergedGroups.unshift({ name: 'technical', items: [...patchTechnical.items] })
+    mergedGroups.unshift({ name: 'technical', items: [...technicalItems] })
   }
 
   return [{ ...baseDoc, groups: mergedGroups }]
@@ -60,10 +64,32 @@ export function makeBankForPrompt(bank: BioBank): unknown {
   }
 }
 
+/** Replace `course_bank` entries with the tailored course name list (subset of the bank). */
+export function applyRelevantCourses(next: BioBank, courses: string[]): BioBank {
+  const capped = capRelevantCoursesList(courses) ?? []
+  if (!capped.length) return next
+  const sanitized = capped.map((c) => sanitizeResumeTypography(String(c)))
+  return {
+    ...next,
+    education: next.education.map((e) =>
+      e.type === 'course_bank' ? { ...e, courses: sanitized } : e,
+    ),
+  }
+}
+
 export function bankFingerprint(bank: BioBank): string {
   const exp = bank.experiences.slice(0, 3).map((e) => e.id).join(', ')
   const proj = bank.projects.slice(0, 3).map((p) => p.id).join(', ')
   return `exp[0..2]=${exp || '(none)'}; proj[0..2]=${proj || '(none)'}`
+}
+
+/** Apply stored tailor patch including optional `relevantCourses` overlay. */
+export function applyTailorPatchToBank(base: BioBank, patch: TailorModelResult): BioBank {
+  let next = applyTailorResult(base, patch)
+  if (patch.relevantCourses?.length) {
+    next = applyRelevantCourses(next, patch.relevantCourses)
+  }
+  return next
 }
 
 export function applyTailorResult(base: BioBank, r: TailorModelResult): BioBank {

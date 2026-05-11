@@ -4,7 +4,7 @@ import type { BioBank } from '../resume/data/bioTypes'
 import { detectAtsRole, extractAtsKeywords, type AtsRole } from '../ats/keywordExtract'
 import { computeAtsMatchReport, type AtsMatchReport } from '../ats/match'
 import { loadTailorPatch } from '../tailor/tailorStorage'
-import { applyTailorResult } from '../tailor/tailorBank'
+import { applyTailorPatchToBank } from '../tailor/tailorBank'
 
 export function useAtsMatch(): {
   atsLoading: boolean
@@ -27,7 +27,7 @@ export function useAtsMatch(): {
     try {
       const base = await fetchBioBank()
       const patch = loadTailorPatch()
-      const bank: BioBank = patch ? applyTailorResult(base, patch) : base
+      const bank: BioBank = patch ? applyTailorPatchToBank(base, patch) : base
 
       setDetectedRole(args.role === 'auto' ? detectAtsRole(args.jobPostingText) : null)
       const keywords = extractAtsKeywords(args.jobPostingText, {

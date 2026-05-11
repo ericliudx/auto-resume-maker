@@ -38,8 +38,8 @@ This repo includes a resume app that can deterministically apply a pasted JSON �
    - In all resume-facing strings (bullets, skills names/items, course names): do not use em dashes (—), en dashes as punctuation (–), or arrows (→). Use commas, “to”, or a plain ASCII hyphen (-) instead.
 
 4) Choose:
-   - `skillsGroups`: exactly ONE group: `{ "name": "technical", "items": [...] }` with the most relevant technical skills (pull items only from the bio bank’s technical list). Do NOT include `leadership` or `others`; the app preserves those from the bio unchanged.
-   - `relevantCourses`: 2–4 courses (subset of the course bank)
+   - `skillsGroups`: exactly ONE group: `{ "name": "technical", "items": [...] }` with the most relevant technical skills (pull items only from the bio bank’s technical list), **at most 10 items** (the app truncates beyond 10). Do NOT include `leadership` or `others`; the app preserves those from the bio unchanged.
+   - `relevantCourses`: 2–4 courses (subset of the course bank); the app keeps at most **4**
    - `pdfFileName` (**required**): one string `First_Last_Company` (first name, last name, short company or team token from the posting), ASCII letters and digits only, underscores between segments, at least three segments (example: `Eric_Liu_Affirm`). The app saves this on tailor and uses it as the suggested print/PDF filename. Omitting it or using an invalid shape is an error for LLM tailor in the app.
 
 5) Output:
@@ -71,7 +71,7 @@ This repo includes a resume app that can deterministically apply a pasted JSON �
 
 Notes:
 - `pdfFileName` is required in the JSON for LLM-driven tailor in the app; pasted deterministic plans may still omit it (then print falls back to `First_Last_Resume` from contact). Invalid `pdfFileName` values are rejected.
-- `skillsGroups` replaces only the bio `technical` row; `leadership` and `others` are never taken from the plan.
+- `skillsGroups` replaces only the bio `technical` row; `leadership` and `others` are never taken from the plan. Each skills row on the resume shows at most 10 items.
 - `experiencePatches`/`projectPatches` must include patches ONLY for the IDs you selected.
 - You may omit `tech` arrays if you are not changing them.
 - Keep `keywordLimit` between 15 and 35 unless the posting is extremely broad.
