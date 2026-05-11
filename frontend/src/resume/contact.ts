@@ -4,6 +4,7 @@ export type ResumeContact = {
   phone: string
   email: string
   linkedin: string
+  github: string
 }
 
 const STORAGE_KEY = 'auto-resume.contact.v1'
@@ -22,6 +23,7 @@ export function loadContact(): ResumeContact {
         phone: 'phone',
         email: 'email@example.com',
         linkedin: 'linkedin.com/in/you',
+        github: 'github.com/you',
       }
     }
     const parsed = JSON.parse(raw) as Partial<ResumeContact>
@@ -31,6 +33,7 @@ export function loadContact(): ResumeContact {
       phone: typeof parsed.phone === 'string' ? parsed.phone : 'phone',
       email: typeof parsed.email === 'string' ? parsed.email : 'email@example.com',
       linkedin: typeof parsed.linkedin === 'string' ? parsed.linkedin : 'linkedin.com/in/you',
+      github: typeof parsed.github === 'string' ? parsed.github : 'github.com/you',
     }
   } catch {
     return {
@@ -39,6 +42,7 @@ export function loadContact(): ResumeContact {
       phone: 'phone',
       email: 'email@example.com',
       linkedin: 'linkedin.com/in/you',
+      github: 'github.com/you',
     }
   }
 }

@@ -16,6 +16,9 @@ So that future tailoring/page-fit features have an obvious place to plug in.
 - When the app loads, the UI shows a **resume viewer** area.
 - The viewer displays a resume representation that is readable and scrollable.
 - The viewer supports **copy** (select/copy text) if the underlying format permits it.
+- The viewer supports switching between:
+  - **Resume**: the fitted 1-page-ish preview (default)
+  - **Super-resume**: an untrimmed view listing **all** experiences and projects for manual verification
 
 ### Paste job posting
 

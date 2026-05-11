@@ -31,6 +31,7 @@ type BioContactResponse =
         phone: string
         email: string
         linkedin: string
+        github: string
       }
     }
   | { ok: false; error: { code: 'not_found' | 'bad_request' | 'server_error'; message: string } }
@@ -275,6 +276,100 @@ function createLlmApiPlugin(env: Record<string, string>): Plugin {
 function createBioApiPlugin(): Plugin {
   const bioRoot = path.resolve(process.cwd(), '..', 'bio')
 
+  type BioContact = Extract<BioContactResponse, { ok: true }>['result']
+
+  type BioDocWithDates = {
+    id?: unknown
+    name?: unknown
+    dates?: { start_date?: unknown; end_date?: unknown }
+  }
+
+  const monthIndex: Record<string, number> = {
+    jan: 1,
+    january: 1,
+    feb: 2,
+    february: 2,
+    mar: 3,
+    march: 3,
+    apr: 4,
+    april: 4,
+    may: 5,
+    jun: 6,
+    june: 6,
+    jul: 7,
+    july: 7,
+    aug: 8,
+    august: 8,
+    sep: 9,
+    sept: 9,
+    september: 9,
+    oct: 10,
+    october: 10,
+    nov: 11,
+    november: 11,
+    dec: 12,
+    december: 12,
+  }
+
+  function parseDateToMonthIndex(raw: unknown): number | null {
+    if (typeof raw !== 'string') return null
+    const s = raw.trim()
+    if (!s) return null
+
+    // YYYY-MM
+    const ym = s.match(/^(\d{4})-(\d{2})$/)
+    if (ym) {
+      const y = Number(ym[1])
+      const m = Number(ym[2])
+      if (Number.isFinite(y) && Number.isFinite(m) && m >= 1 && m <= 12) return y * 12 + m
+      return null
+    }
+
+    // YYYY
+    const yOnly = s.match(/^(\d{4})$/)
+    if (yOnly) {
+      const y = Number(yOnly[1])
+      return Number.isFinite(y) ? y * 12 + 1 : null
+    }
+
+    // "Mon YYYY" or "Month YYYY"
+    const monY = s.match(/^([A-Za-z]+)\s+(\d{4})$/)
+    if (monY) {
+      const mon = monthIndex[monY[1].toLowerCase()]
+      const y = Number(monY[2])
+      if (!mon || !Number.isFinite(y)) return null
+      return y * 12 + mon
+    }
+
+    return null
+  }
+
+  function sortDocsNewestFirst<T>(docs: T[]): T[] {
+    const PRESENT = 999_999_999 // larger than any realistic (year * 12 + month)
+    return docs
+      .slice()
+      .sort((a, b) => {
+        const aa = a as unknown as BioDocWithDates
+        const bb = b as unknown as BioDocWithDates
+
+        const aEnd = parseDateToMonthIndex(aa?.dates?.end_date) ?? PRESENT
+        const bEnd = parseDateToMonthIndex(bb?.dates?.end_date) ?? PRESENT
+        if (aEnd !== bEnd) return bEnd - aEnd
+
+        const aStart = parseDateToMonthIndex(aa?.dates?.start_date) ?? -1
+        const bStart = parseDateToMonthIndex(bb?.dates?.start_date) ?? -1
+        if (aStart !== bStart) return bStart - aStart
+
+        const aName = typeof aa?.name === 'string' ? aa.name : ''
+        const bName = typeof bb?.name === 'string' ? bb.name : ''
+        if (aName !== bName) return aName.localeCompare(bName)
+
+        const aId = typeof aa?.id === 'string' ? aa.id : ''
+        const bId = typeof bb?.id === 'string' ? bb.id : ''
+        return aId.localeCompare(bId)
+      })
+  }
+
   async function readJsonDir(dir: string): Promise<unknown[]> {
     const full = path.join(bioRoot, dir)
     let names: string[]
@@ -341,9 +436,35 @@ function createBioApiPlugin(): Plugin {
             return
           }
 
+          const v = parsed.value as Record<string, unknown>
+          const isContact =
+            typeof v.name === 'string' &&
+            typeof v.location === 'string' &&
+            typeof v.phone === 'string' &&
+            typeof v.email === 'string' &&
+            typeof v.linkedin === 'string' &&
+            typeof v.github === 'string'
+
+          if (!isContact) {
+            res.statusCode = 500
+            res.setHeader('content-type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: false,
+                error: {
+                  code: 'server_error',
+                  message:
+                    'Invalid contact.json: expected { name, location, phone, email, linkedin, github } strings.',
+                },
+              } satisfies BioContactResponse),
+            )
+            return
+          }
+
+          const contact = v as BioContact
           res.statusCode = 200
           res.setHeader('content-type', 'application/json')
-          res.end(JSON.stringify({ ok: true, result: parsed.value } satisfies BioContactResponse))
+          res.end(JSON.stringify({ ok: true, result: contact } satisfies BioContactResponse))
         } catch {
           res.statusCode = 500
           res.setHeader('content-type', 'application/json')
@@ -382,7 +503,12 @@ function createBioApiPlugin(): Plugin {
           res.end(
             JSON.stringify({
               ok: true,
-              result: { experiences, projects, education, skills },
+              result: {
+                experiences: sortDocsNewestFirst(experiences),
+                projects: sortDocsNewestFirst(projects),
+                education,
+                skills,
+              },
             } satisfies BioBankResponse),
           )
         } catch {
