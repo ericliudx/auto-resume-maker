@@ -40,6 +40,7 @@ This repo includes a resume app that can deterministically apply a pasted JSON â
 4) Choose:
    - `skillsGroups`: exactly ONE group: `{ "name": "technical", "items": [...] }` with the most relevant technical skills (pull items only from the bio bankâ€™s technical list). Do NOT include `leadership` or `others`; the app preserves those from the bio unchanged.
    - `relevantCourses`: 2â€“4 courses (subset of the course bank)
+   - `pdfFileName` (**required**): one string `First_Last_Company` (first name, last name, short company or team token from the posting), ASCII letters and digits only, underscores between segments, at least three segments (example: `Eric_Liu_Affirm`). The app saves this on tailor and uses it as the suggested print/PDF filename. Omitting it or using an invalid shape is an error for LLM tailor in the app.
 
 5) Output:
    - First: a single JSON object in the exact plan shape below (NO markdown, NO extra prose).
@@ -55,6 +56,7 @@ This repo includes a resume app that can deterministically apply a pasted JSON â
   "keywordLimit": 25,
   "experienceIds": ["<id>", "..."],
   "projectIds": ["<id>", "..."],
+  "pdfFileName": "First_Last_Company",
   "experiencePatches": [
     { "id": "<id>", "bullets": ["...", "...", "..."], "tech": ["..."] }
   ],
@@ -68,6 +70,7 @@ This repo includes a resume app that can deterministically apply a pasted JSON â
 }
 
 Notes:
+- `pdfFileName` is required in the JSON for LLM-driven tailor in the app; pasted deterministic plans may still omit it (then print falls back to `First_Last_Resume` from contact). Invalid `pdfFileName` values are rejected.
 - `skillsGroups` replaces only the bio `technical` row; `leadership` and `others` are never taken from the plan.
 - `experiencePatches`/`projectPatches` must include patches ONLY for the IDs you selected.
 - You may omit `tech` arrays if you are not changing them.

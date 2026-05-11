@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ResumePreview } from "./resume/views/ResumePreview";
 import { SuperResumePreview } from "./resume/views/SuperResumePreview";
 import { AppHeader } from "./components/AppHeader";
@@ -53,12 +53,6 @@ function App() {
     "",
   );
   const [planError, setPlanError] = useState<string>("");
-
-  useEffect(() => {
-    if (!isPrint) return;
-    const t = window.setTimeout(() => window.print(), 50);
-    return () => window.clearTimeout(t);
-  }, [isPrint]);
 
   const jobPostingStats = useMemo(() => {
     const chars = jobPostingText.length;

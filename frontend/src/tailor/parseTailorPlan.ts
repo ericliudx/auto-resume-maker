@@ -1,5 +1,6 @@
 import type { AtsRole } from '../ats/keywordExtract'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
+import { sanitizePdfFileNameForPlan } from './pdfFileName'
 
 const DEFAULT_PLAN: TailorPlan = {
   role: 'auto',
@@ -47,19 +48,19 @@ export function parseTailorPlan(
       if (experienceIds.length === 0 || projectIds.length === 0) {
         return { ok: false as const, error: 'Plan JSON must include non-empty experienceIds and projectIds.' }
       }
-      return {
-        ok: true as const,
-        plan: {
-          role,
-          keywordLimit: Math.trunc(keywordLimit),
-          experienceIds,
-          projectIds,
-          experiencePatches: Array.isArray(parsed.experiencePatches) ? parsed.experiencePatches : undefined,
-          projectPatches: Array.isArray(parsed.projectPatches) ? parsed.projectPatches : undefined,
-          skillsGroups: Array.isArray(parsed.skillsGroups) ? parsed.skillsGroups : undefined,
-          relevantCourses: Array.isArray(parsed.relevantCourses) ? parsed.relevantCourses : undefined,
-        } satisfies TailorPlanV2,
+      const pdfFileName = sanitizePdfFileNameForPlan(parsed.pdfFileName)
+      const plan: TailorPlanV2 = {
+        role,
+        keywordLimit: Math.trunc(keywordLimit),
+        experienceIds,
+        projectIds,
+        experiencePatches: Array.isArray(parsed.experiencePatches) ? parsed.experiencePatches : undefined,
+        projectPatches: Array.isArray(parsed.projectPatches) ? parsed.projectPatches : undefined,
+        skillsGroups: Array.isArray(parsed.skillsGroups) ? parsed.skillsGroups : undefined,
+        relevantCourses: Array.isArray(parsed.relevantCourses) ? parsed.relevantCourses : undefined,
       }
+      if (pdfFileName) plan.pdfFileName = pdfFileName
+      return { ok: true as const, plan }
     } catch {
       return { ok: false as const, error: 'Invalid JSON in Tailor Plan.' }
     }

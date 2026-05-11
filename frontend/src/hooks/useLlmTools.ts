@@ -97,7 +97,7 @@ export function useLlmTools(): {
 
       const data = await llmChat({
         system:
-          'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape.',
+          'You are a careful resume tailoring assistant. Output must be strictly valid JSON per the requested shape. The top-level pdfFileName field is required.',
         user: prompt,
         temperature: 0.2,
       })
@@ -132,6 +132,7 @@ export function useLlmTools(): {
           'Tailor applied (derived view; bio bank unchanged).',
           `Base: ${bankFingerprint(bank)}`,
           `Tailored: ${bankFingerprint(next)}`,
+          `Print/PDF title (saved): ${validated.normalized.pdfFileName ?? '(none)'}`,
           `Selected experienceIds: ${(validated.normalized.experienceIds ?? []).join(', ') || '(none)'}`,
           `Selected projectIds: ${(validated.normalized.projectIds ?? []).join(', ') || '(none)'}`,
         ].join('\n'),
