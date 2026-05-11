@@ -3,6 +3,9 @@ import { extractAtsKeywords } from '../ats/keywordExtract'
 import type { TailorModelResult } from './tailorTypes'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
 
+/** Max items to auto-pick for simple (non-V2) plans; avoids forcing exactly 3 while staying bounded. */
+const SIMPLE_PLAN_SELECTION_CAP = 12
+
 function norm(s: string): string {
   return s.toLowerCase()
 }
@@ -94,14 +97,14 @@ export function generateDeterministicTailorPatch(args: {
     ids: args.bank.experiences.map((e) => e.id),
     scores: expScores,
     mustInclude: args.plan.mustIncludeExperienceIds,
-    limit: 3,
+    limit: Math.min(Math.max(args.bank.experiences.length, 1), SIMPLE_PLAN_SELECTION_CAP),
   })
 
   const projectIds = pickTopIds({
     ids: args.bank.projects.map((p) => p.id),
     scores: projScores,
     mustInclude: args.plan.mustIncludeProjectIds,
-    limit: 3,
+    limit: Math.min(Math.max(args.bank.projects.length, 1), SIMPLE_PLAN_SELECTION_CAP),
   })
 
   // Deterministic mode: selection + ordering only.

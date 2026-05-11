@@ -11,6 +11,7 @@ import { validateTailorResult } from '../tailor/validateTailor'
 import { clearTailorPatch, loadTailorPatch, saveTailorPatch } from '../tailor/tailorStorage'
 import { generateDeterministicTailorPatch } from '../tailor/deterministicTailor'
 import type { TailorPlan, TailorPlanV2 } from '../tailor/planTypes'
+import { sanitizeResumeTypography } from '../tailor/resumeTypography'
 
 export function useLlmTools(): {
   llmLoading: boolean
@@ -249,12 +250,13 @@ export function useLlmTools(): {
       if ('experienceIds' in args.plan) {
         const planV2 = args.plan as TailorPlanV2
         if (Array.isArray(planV2.relevantCourses)) {
-        next = {
-          ...next,
-          education: next.education.map((e) =>
-            e.type === 'course_bank' ? { ...e, courses: planV2.relevantCourses } : e,
-          ),
-        }
+          const courses = planV2.relevantCourses.map((c) => sanitizeResumeTypography(String(c)))
+          next = {
+            ...next,
+            education: next.education.map((e) =>
+              e.type === 'course_bank' ? { ...e, courses } : e,
+            ),
+          }
         }
       }
       saveTailorPatch(patch)

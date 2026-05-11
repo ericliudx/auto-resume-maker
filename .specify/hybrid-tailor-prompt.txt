@@ -22,17 +22,21 @@ You are an AI assistant helping tailor a resume in the local-only repo `auto-res
 1) Infer target role preset from the posting (use one of):
    - auto, software_eng, data_eng, data_science, project_management, data_analysis, systems_eng, industrial_eng
 
-2) Choose EXACTLY:
-   - 3 experience IDs (from `bio/experiences/*.json`)
-   - 3 project IDs (from `bio/projects/*.json`)
+2) Choose experience and project IDs by relevance (not a fixed count):
+   - Typical range: 2–5 experiences and 2–5 projects; use fewer if the bank is small or the posting is narrow.
+   - Include at least 1 experience and 1 project whenever the bank contains any.
 
 3) Rewrite bullets for those selected experiences/projects:
-   - Max 3 bullets per item
+   - 1–3 bullets per item (never 0 bullets for a selected item)
+   - In bullets, skills names/items, and course names: do not use em dashes (—), en dashes as punctuation (–), or arrows (→); use commas, “to”, or ASCII hyphen (-).
    - Use the job posting's exact phrases when truthful equivalents
-   - Prefer platform/infra language when the posting emphasizes deployment/monitoring/reliability/scaling
+   - Keep bullets concise to fit one page with fixed header + skills:
+     - Per bullet: 12–22 words (hard max 28)
+     - Prefer 1 line; allow 2 lines only for the single most important bullet per item
+     - Total bullet text budget (all selected experiences + projects): ~220–320 words
 
 4) Choose:
-   - skillsGroups: 2–4 groups with the most relevant skills (from `bio/skills/*.json` + truth addendum)
+   - skillsGroups: exactly ONE group: `{ "name": "technical", "items": [...] }` (items only from the bio technical list). Do NOT output leadership or others; the app keeps those from the bio unchanged.
    - relevantCourses: 2–4 courses (subset of the course bank)
 
 5) Output:
@@ -47,8 +51,8 @@ You are an AI assistant helping tailor a resume in the local-only repo `auto-res
 {
   "role": "<one of the role presets>",
   "keywordLimit": 25,
-  "experienceIds": ["<id>", "<id>", "<id>"],
-  "projectIds": ["<id>", "<id>", "<id>"],
+  "experienceIds": ["<id>", "..."],
+  "projectIds": ["<id>", "..."],
   "experiencePatches": [
     { "id": "<id>", "bullets": ["...", "...", "..."], "tech": ["..."] }
   ],
@@ -56,8 +60,7 @@ You are an AI assistant helping tailor a resume in the local-only repo `auto-res
     { "id": "<id>", "bullets": ["...", "...", "..."], "tech": ["..."] }
   ],
   "skillsGroups": [
-    { "name": "Languages", "items": ["..."] },
-    { "name": "Cloud/Infra", "items": ["..."] }
+    { "name": "technical", "items": ["...", "..."] }
   ],
   "relevantCourses": ["...", "..."]
 }
@@ -68,6 +71,7 @@ BIGGEST_GAPS:
 - next_edits: ...
 
 Notes:
+- `skillsGroups` updates only the bio `technical` row; leadership and others are never read from the plan.
 - `experiencePatches`/`projectPatches` should include patches ONLY for the IDs you selected.
 - You may omit non-critical fields (title/subtitle/descriptor) unless the rewrite improves ATS match.
 - Keep `keywordLimit` between 15 and 35 unless the posting is extremely broad.
