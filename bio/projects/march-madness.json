@@ -2,7 +2,9 @@
   "id": "march_madness",
   "type": "project",
   "name": "March Madness Project",
-  "dates": "2024",
+  "dates": {
+    "start_date": "2024"
+  },
   "header": "March Madness Project | Data Mining, Hyperparameter Tuning 2024",
   "bullets": [
     "Applied Pandas and PyTorch to project 2024 March Madness bracket results prior to finalization of the tournament schedule.",

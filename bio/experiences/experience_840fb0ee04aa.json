@@ -2,7 +2,10 @@
   "id": "experience_840fb0ee04aa",
   "type": "experience",
   "header": "BTS Shanghai | Data Analytics Platform in Healthcare Software Engineering Intern",
-  "dates": "Jun 2023 – Aug 2023",
+  "dates": {
+    "start_date": "Jun 2023",
+    "end_date": "Aug 2023"
+  },
   "bullets": [
     "Collaborated with colleagues during an internship for a consulting company in Shanghai with primary focus on developing and implementing an incentives program for US plasma donation company",
     "Architected and built a scalable backend using Node.js, Express, and MongoDB to manage donor user profiles, transaction history, and rewards, implementing RESTful APIs to ensure stability in data models and accurate recording of donor information for healthcare clients",

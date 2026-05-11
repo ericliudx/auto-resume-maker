@@ -3,7 +3,9 @@
   "type": "experience",
   "company": "RealTorch",
   "name": "Listing QC Tool (Internal Web App)",
-  "dates": "Mar 2026 – Present",
+  "dates": {
+    "start_date": "Mar 2026"
+  },
   "bullets": [
     "Built an internal web app to quickly review and fix real-estate listing data inconsistencies (e.g., wrong community/builder, missing values, or mismatched fields across listings).",
     "Designed the workflow around listing “clusters” (groups of records likely referring to the same place/community/builder): operators pick a company and ZIP code, then review clusters and standardize fields across many listings.",
@@ -13,7 +15,13 @@
     "Extended the backend in a backwards-compatible way to support correct undo behavior (e.g., clearing fields to NULL) without requiring schema changes."
   ],
   "tech": ["React", "Flask", "Node.js", "Python"],
-  "tags": ["internal-tooling", "workflow", "quality-control", "data-quality", "bulk-editing"],
+  "tags": [
+    "internal-tooling",
+    "workflow",
+    "quality-control",
+    "data-quality",
+    "bulk-editing"
+  ],
   "source": {
     "path": "bio/existing-stuff/Real-Torch-QCTool.txt",
     "kind": "txt"

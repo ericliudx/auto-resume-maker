@@ -2,7 +2,9 @@
   "id": "ai_powered_tutoring_platform",
   "type": "project",
   "name": "AI-Powered Tutoring Platform",
-  "dates": "2025",
+  "dates": {
+    "start_date": "2025"
+  },
   "header": "AI-Driven Tutoring Platform | Full-Stack Software Engineering, Gemini API Integration 2025",
   "bullets": [
     "Designed and built a tutoring platform with end-to-end workflows for course content, quizzes, and user progress tracking.",

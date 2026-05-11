@@ -9,8 +9,8 @@
       "majors": ["Mathematics", "Computer Science", "Cognitive Science"],
       "gpa": 3.53,
       "dates": {
-        "start": "2022-09",
-        "end": "2026-01"
+        "start_date": "2022-09",
+        "end_date": "2026-01"
       }
     },
     {
@@ -19,8 +19,8 @@
       "field": "Industrial and Systems Engineering",
       "gpa": 3.75,
       "dates": {
-        "start": "2024-09",
-        "end": "2026-05"
+        "start_date": "2024-09",
+        "end_date": "2026-05"
       }
     }
   ],

@@ -37,6 +37,14 @@ The `llm-api` feature currently implements a **local-only** LLM proxy inside the
   - `GROQ_API_KEY` (required to call Groq)
   - `GROQ_MODEL` (optional default model id)
 
+## Local Bio API (dev-server, read-only)
+
+The app reads resume source material from the repo’s `bio/` folder via a local-only dev-server endpoint:
+
+- **Endpoint**: `GET /api/bio/bank`
+- **Returns**: aggregated JSON from `bio/education/`, `bio/experiences/`, `bio/projects/`, `bio/skills/`
+- **Implementation**: Vite middleware in `frontend/vite.config.ts` (read-only)
+
 ## How to run locally
 
 ```text

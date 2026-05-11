@@ -2,7 +2,9 @@
   "id": "solar_parking_lot",
   "type": "project",
   "name": "Solar Parking Lot Project",
-  "dates": "2025",
+  "dates": {
+    "start_date": "2025"
+  },
   "header": "Solar Parking Lot Project | Project Management, App Development, Jira 2025",
   "bullets": [
     "Applied project management principles to a sustainability initiative focused on developing a parking lot with smart sensors for available spaces and charging stations fueled by solar panel technology.",
