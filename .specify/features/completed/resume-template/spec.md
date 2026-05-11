@@ -30,4 +30,5 @@ Generate tailored resumes while keeping a **fixed, consistent template** (sectio
 - Personal contact info is not written to tracked files.
 - The local API only reads from disk; it does not modify the `bio/` bank.
 - Resume template CSS is scoped/injected (not global) to avoid Tailwind or other resets changing bullet/list typography (via `ResumeScope`’s inline `<style>`).
+- Print/PDF headers and footers (URL/date/page number) are controlled by the browser print dialog, not the app.
 

@@ -1,17 +1,27 @@
 import type React from 'react'
 
-export function ResumeToolbar() {
+export function ResumeToolbar({
+  right,
+  children,
+}: {
+  right?: React.ReactNode
+  children?: React.ReactNode
+}) {
   return (
-    <div className="resumePane__toolbar">
-      <div className="resumePane__toolbarLeft">
-        <div className="resumePane__title">Locked template preview</div>
-        <div className="resumePane__hint">Rendered from gitignored `bio/` files via local API</div>
+    <div>
+      <div className="resumePane__toolbar">
+        <div className="resumePane__toolbarLeft">
+          <div className="resumePane__title">Locked template preview</div>
+          <div className="resumePane__hint">Rendered from gitignored `bio/` files via local API</div>
+        </div>
+        <div className="resumePane__toolbarRight">
+          {right}
+          <a className="resumePane__button" href="/?print=1" target="_blank" rel="noreferrer">
+            Print / Save PDF
+          </a>
+        </div>
       </div>
-      <div className="resumePane__toolbarRight">
-        <a className="resumePane__button" href="/?print=1" target="_blank" rel="noreferrer">
-          Print / Save PDF
-        </a>
-      </div>
+      {children}
     </div>
   )
 }

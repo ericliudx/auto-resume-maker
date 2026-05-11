@@ -31,7 +31,7 @@
 
 The frontend uses Tailwind for the app shell while keeping the resume template styling locked:
 
-- **Tailwind**: configured in `frontend/tailwind.config.js` and wired via PostCSS (`frontend/postcss.config.js`). Utilities are available in TSX components.
+- **Tailwind**: configured in `frontend/tailwind.config.cjs` and wired via PostCSS (`frontend/postcss.config.js`). Utilities are available in TSX components.
 - **Globals**: CSS variables + baseline remain in `frontend/src/index.css`.
 - **Resume template styling**: injected by `frontend/src/resume/ui/ResumeScope.tsx` via an inline `<style>` tag, scoped under `.resumeScope` so it doesn’t leak.
   - CSS is composed from `frontend/src/resume/styles/resumeCssShell.ts`, `frontend/src/resume/styles/resumeCssTemplate.ts`, and `frontend/src/resume/styles/resumeCssPrint.ts` (assembled in `frontend/src/resume/styles/resumeCss.ts`).
