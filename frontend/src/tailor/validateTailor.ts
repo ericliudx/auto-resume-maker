@@ -1,5 +1,6 @@
 import type { BioBank } from '../resume/data/bioTypes'
 import type { TailorModelResult } from './tailorTypes'
+import { sanitizePdfFileNameForPlan } from './pdfFileName'
 
 function uniqueStrings(xs: unknown): string[] {
   if (!Array.isArray(xs)) return []
@@ -40,10 +41,20 @@ export function validateTailorResult(args: {
   if (badProj.length) return { ok: false, message: `Model used unknown projectIds: ${badProj.join(', ')}` }
 
   const MAX_IDS = 12
+  const { pdfFileName: pdfRaw, ...resultRest } = result
+  const pdfSanitized = sanitizePdfFileNameForPlan(pdfRaw)
+  if (mode === 'default' && !pdfSanitized) {
+    return {
+      ok: false,
+      message:
+        'Model must return a valid top-level pdfFileName (First_Last_Company: at least three ASCII segments separated by underscores, e.g. Eric_Liu_Affirm).',
+    }
+  }
   const normalized: TailorModelResult = {
-    ...result,
+    ...resultRest,
     experienceIds: expIds.slice(0, MAX_IDS),
     projectIds: projIds.slice(0, MAX_IDS),
+    ...(pdfSanitized ? { pdfFileName: pdfSanitized } : {}),
   }
 
   const expPatchIds = new Set((normalized.experiences ?? []).map((e) => e.id))

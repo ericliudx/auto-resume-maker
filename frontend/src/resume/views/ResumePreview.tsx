@@ -3,9 +3,14 @@ import { useResumeData } from "../hooks/useResumeData";
 import { ResumeScope } from "../ui/ResumeScope";
 import { ResumeCanvas, ResumeError, ResumeToolbar } from "../ui/ResumeShell";
 import { ContactEditor } from "../ui/ContactEditor";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BioBank } from "../data/bioTypes";
 import { ResumeTemplate } from "../ResumeTemplate";
+import { loadTailorPatch } from "../../tailor/tailorStorage";
+import { documentTitleForPrint } from "../printResumeTitle";
+
+/** Avoid duplicate `window.print()` under React StrictMode (dev) double-mount. */
+let resumePrintAutoLock = false;
 
 export function ResumePreview({
   mode,
@@ -14,9 +19,12 @@ export function ResumePreview({
   mode: "app" | "print";
   bankOverride?: BioBank | null;
 }) {
-  const { bank, contact, setContact, error, loading } = useResumeData();
+  const { bank, contact, setContact, error, loading, contactSynced } =
+    useResumeData();
   const [showContact, setShowContact] = useState<boolean>(false);
   const [fitEnabled, setFitEnabled] = useState<boolean>(true);
+  const contactRef = useRef(contact);
+  contactRef.current = contact;
   const [fitInfo, setFitInfo] = useState<{
     cfg: {
       expLimit: number;
@@ -89,6 +97,34 @@ export function ResumePreview({
       projBulletsDropped,
     };
   }, [fitInfo, bank, bankOverride]);
+
+  useEffect(() => {
+    if (mode !== "print") {
+      resumePrintAutoLock = false;
+      return;
+    }
+    if (!bank || !contactSynced || error) return;
+    if (resumePrintAutoLock) return;
+    resumePrintAutoLock = true;
+
+    const prevTitle = document.title;
+    const patch = loadTailorPatch();
+    document.title = documentTitleForPrint(contactRef.current, patch);
+
+    const t = window.setTimeout(() => window.print(), 80);
+
+    const restoreTitle = () => {
+      document.title = prevTitle;
+    };
+    window.addEventListener("afterprint", restoreTitle);
+
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("afterprint", restoreTitle);
+      restoreTitle();
+      if (import.meta.env.DEV) resumePrintAutoLock = false;
+    };
+  }, [mode, bank, contactSynced, error]);
 
   if (mode === "print") {
     return (

@@ -27,5 +27,8 @@ export type TailorModelResult = {
     bulletIndex: number
   }>
   cannotAdd?: Array<{ keyword: string; reason: string }>
+
+  /** Save-to-PDF suggested name when present and valid (`First_Last_Company`). */
+  pdfFileName?: string
 }
 

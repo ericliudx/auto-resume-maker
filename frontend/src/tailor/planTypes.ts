@@ -31,5 +31,7 @@ export type TailorPlanV2 = {
   }>
   skillsGroups?: Array<{ name: string; items: string[] }>
   relevantCourses?: string[]
+  /** Print/PDF basename: `First_Last_Company` (underscores, ASCII). */
+  pdfFileName?: string
 }
 

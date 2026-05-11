@@ -40,10 +40,12 @@ export function useResumeData(): {
   setContact: (next: ResumeContact) => void;
   error: string;
   loading: boolean;
+  contactSynced: boolean;
 } {
   const [bank, setBank] = useState<BioBank | null>(null);
   const [error, setError] = useState<string>("");
   const [contact, setContact] = useState<ResumeContact>(() => loadContact());
+  const [contactSynced, setContactSynced] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,7 +70,10 @@ export function useResumeData(): {
       .then((c) => {
         if (!cancelled && c) setContact(c);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setContactSynced(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -86,7 +91,8 @@ export function useResumeData(): {
       setContact: setAndPersistContact,
       error,
       loading: !bank && !error,
+      contactSynced,
     }),
-    [bank, contact, error],
+    [bank, contact, error, contactSynced],
   );
 }

@@ -2,6 +2,7 @@ import type { BioBank, BioExperience, BioProject } from '../resume/data/bioTypes
 import { extractAtsKeywords } from '../ats/keywordExtract'
 import type { TailorModelResult } from './tailorTypes'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
+import { sanitizePdfFileNameForPlan } from './pdfFileName'
 
 /** Max items to auto-pick for simple (non-V2) plans; avoids forcing exactly 3 while staying bounded. */
 const SIMPLE_PLAN_SELECTION_CAP = 12
@@ -69,12 +70,15 @@ export function generateDeterministicTailorPatch(args: {
 }): TailorModelResult {
   // V2: explicit selection + patches.
   if ('experienceIds' in args.plan && 'projectIds' in args.plan) {
+    const plan = args.plan as TailorPlanV2
+    const pdfFileName = sanitizePdfFileNameForPlan(plan.pdfFileName)
     return {
-      experienceIds: args.plan.experienceIds,
-      projectIds: args.plan.projectIds,
-      experiences: (args.plan.experiencePatches ?? []).map((p) => ({ ...p })),
-      projects: (args.plan.projectPatches ?? []).map((p) => ({ ...p })),
-      skills: args.plan.skillsGroups ? { groups: args.plan.skillsGroups } : undefined,
+      experienceIds: plan.experienceIds,
+      projectIds: plan.projectIds,
+      experiences: (plan.experiencePatches ?? []).map((p) => ({ ...p })),
+      projects: (plan.projectPatches ?? []).map((p) => ({ ...p })),
+      skills: plan.skillsGroups ? { groups: plan.skillsGroups } : undefined,
+      ...(pdfFileName ? { pdfFileName } : {}),
     }
   }
 
