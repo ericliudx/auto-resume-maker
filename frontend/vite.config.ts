@@ -22,6 +22,19 @@ type BioBankResponse =
     }
   | { ok: false; error: { code: 'not_found' | 'bad_request' | 'server_error'; message: string } }
 
+type BioContactResponse =
+  | {
+      ok: true
+      result: {
+        name: string
+        location: string
+        phone: string
+        email: string
+        linkedin: string
+      }
+    }
+  | { ok: false; error: { code: 'not_found' | 'bad_request' | 'server_error'; message: string } }
+
 type LlmChatSuccess = {
   ok: true
   result: {
@@ -285,6 +298,64 @@ function createBioApiPlugin(): Plugin {
   return {
     name: 'local-bio-api',
     configureServer(server) {
+      server.middlewares.use('/api/bio/contact', async (req, res) => {
+        try {
+          if (req.method !== 'GET') {
+            res.statusCode = 405
+            res.setHeader('content-type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: false,
+                error: { code: 'bad_request', message: 'Method not allowed.' },
+              } satisfies BioContactResponse),
+            )
+            return
+          }
+
+          const p = path.join(bioRoot, 'contact.json')
+          let text: string
+          try {
+            text = await fs.readFile(p, 'utf8')
+          } catch {
+            res.statusCode = 404
+            res.setHeader('content-type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: false,
+                error: { code: 'not_found', message: 'Missing bio/contact.json.' },
+              } satisfies BioContactResponse),
+            )
+            return
+          }
+
+          const parsed = safeJsonParse(text)
+          if (!parsed.ok || typeof parsed.value !== 'object' || parsed.value === null) {
+            res.statusCode = 500
+            res.setHeader('content-type', 'application/json')
+            res.end(
+              JSON.stringify({
+                ok: false,
+                error: { code: 'server_error', message: 'Invalid contact.json.' },
+              } satisfies BioContactResponse),
+            )
+            return
+          }
+
+          res.statusCode = 200
+          res.setHeader('content-type', 'application/json')
+          res.end(JSON.stringify({ ok: true, result: parsed.value } satisfies BioContactResponse))
+        } catch {
+          res.statusCode = 500
+          res.setHeader('content-type', 'application/json')
+          res.end(
+            JSON.stringify({
+              ok: false,
+              error: { code: 'server_error', message: 'Failed to read contact.' },
+            } satisfies BioContactResponse),
+          )
+        }
+      })
+
       server.middlewares.use('/api/bio/bank', async (req, res) => {
         try {
           if (req.method !== 'GET') {

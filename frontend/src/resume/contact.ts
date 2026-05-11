@@ -8,6 +8,10 @@ export type ResumeContact = {
 
 const STORAGE_KEY = 'auto-resume.contact.v1'
 
+export function hasStoredContact(): boolean {
+  return localStorage.getItem(STORAGE_KEY) != null
+}
+
 export function loadContact(): ResumeContact {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
