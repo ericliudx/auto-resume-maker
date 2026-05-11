@@ -9,25 +9,57 @@ function hasBioDates(d: BioDateRange | undefined): boolean {
   return Boolean(d?.start_date?.trim() || d?.end_date?.trim())
 }
 
-/** Single-line fallback (e.g. next to project name in the header). */
+function formatMonthYear(s: string): string {
+  const m = s.match(/^(\d{4})-(\d{2})$/)
+  if (!m) return s
+  const year = m[1]
+  const mm = m[2]
+  const monthNames: Record<string, string> = {
+    '01': 'Jan',
+    '02': 'Feb',
+    '03': 'Mar',
+    '04': 'Apr',
+    '05': 'May',
+    '06': 'Jun',
+    '07': 'Jul',
+    '08': 'Aug',
+    '09': 'Sep',
+    '10': 'Oct',
+    '11': 'Nov',
+    '12': 'Dec',
+  }
+  const mon = monthNames[mm]
+  return mon ? `${mon} ${year}` : s
+}
+
+function formatDateToken(s: string): string {
+  // Leave years ("2025") and already-formatted month words ("Jun 2024") alone.
+  // Convert only strict YYYY-MM to "Mon YYYY".
+  return formatMonthYear(s)
+}
+
+/** Single-line date range (for right-aligned dates). */
 function formatBioDateRangeCompact(d: BioDateRange | undefined): string {
-  const s = d?.start_date?.trim()
-  const e = d?.end_date?.trim()
+  const sRaw = d?.start_date?.trim()
+  const eRaw = d?.end_date?.trim()
+  const s = sRaw ? formatDateToken(sRaw) : undefined
+  const e = eRaw ? formatDateToken(eRaw) : undefined
   if (!s) return e ?? ''
-  if (!e) return s
+  if (!e) return `${s} to present`
   return `${s} – ${e}`
 }
 
 function BioDateLabels({ dates }: { dates: BioDateRange }) {
-  const start = dates.start_date?.trim()
-  const end = dates.end_date?.trim()
-  if (!start && !end) return null
-  return (
-    <div className="rt__itemDates">
-      {start ? <div>Start date: {start}</div> : null}
-      {end ? <div>End date: {end}</div> : null}
-    </div>
-  )
+  const compact = formatBioDateRangeCompact(dates)
+  if (!isNonEmptyString(compact)) return null
+  return <div className="rt__itemDates">{compact}</div>
+}
+
+function parseHeaderPipe(header: string | undefined): { left?: string; right?: string } {
+  if (!isNonEmptyString(header)) return {}
+  const parts = header.split('|').map((p) => p.trim()).filter((p) => p !== '')
+  if (parts.length < 2) return { left: header }
+  return { left: parts[0], right: parts.slice(1).join(' | ') }
 }
 
 function formatEducationLine(entry: NonNullable<BioEducation['entries']>[number]): string {
@@ -53,18 +85,32 @@ function sectionTitle(title: string) {
 }
 
 function renderExperience(x: BioExperience) {
-  const header = isNonEmptyString(x.header)
-    ? x.header
-    : [x.company, x.name].filter((p): p is string => isNonEmptyString(p)).join(' — ')
+  const headerParts = parseHeaderPipe(x.header)
+  const topLeft =
+    [x.company, x.name].filter((p): p is string => isNonEmptyString(p)).join(' | ') ||
+    headerParts.left ||
+    ''
+  const topRightItalic = headerParts.right
 
-  if (!isNonEmptyString(header)) return null
+  const titleLine =
+    [x.title, x.subtitle]
+      .filter((p): p is string => isNonEmptyString(p))
+      .join(' | ') || undefined
+
+  if (!isNonEmptyString(topLeft)) return null
 
   return (
     <div className="rt__item" key={x.id}>
       <div className="rt__itemTop">
-        <div className="rt__itemHeader">{header}</div>
+        <div className="rt__itemHeader">
+          {topLeft}
+          {isNonEmptyString(topRightItalic) ? (
+            <span className="rt__mutedItalic"> | {topRightItalic}</span>
+          ) : null}
+        </div>
         {hasBioDates(x.dates) && x.dates ? <BioDateLabels dates={x.dates} /> : null}
       </div>
+      {isNonEmptyString(titleLine) ? <div className="rt__subline">{titleLine}</div> : null}
       {Array.isArray(x.bullets) && x.bullets.length > 0 ? (
         <ul className="rt__bullets">
           {x.bullets.map((b, i) => (
@@ -77,19 +123,23 @@ function renderExperience(x: BioExperience) {
 }
 
 function renderProject(x: BioProject) {
-  const dateCompact = formatBioDateRangeCompact(x.dates)
-  const header = isNonEmptyString(x.header)
-    ? x.header
-    : [x.name, dateCompact].filter((p): p is string => isNonEmptyString(p)).join(' · ')
+  const headerParts = parseHeaderPipe(x.header)
+  const name = isNonEmptyString(x.name) ? x.name : headerParts.left
+  const descriptor =
+    isNonEmptyString(x.descriptor) ? x.descriptor : headerParts.right
 
-  if (!isNonEmptyString(header)) return null
+  if (!isNonEmptyString(name)) return null
 
   return (
     <div className="rt__item" key={x.id}>
       <div className="rt__itemTop">
-        <div className="rt__itemHeader">{header}</div>
+        <div className="rt__itemHeader">
+          {name}
+          {isNonEmptyString(descriptor) ? <span className="rt__mutedItalic"> | {descriptor}</span> : null}
+        </div>
         {hasBioDates(x.dates) && x.dates ? <BioDateLabels dates={x.dates} /> : null}
       </div>
+      {isNonEmptyString(x.role) ? <div className="rt__subline">{x.role}</div> : null}
       {Array.isArray(x.bullets) && x.bullets.length > 0 ? (
         <ul className="rt__bullets">
           {x.bullets.map((b, i) => (
@@ -103,17 +153,37 @@ function renderProject(x: BioProject) {
 
 function renderSkills(skills: BioSkills[]) {
   const groups = skills.flatMap((s) => (Array.isArray(s.groups) ? s.groups : []))
-  const items = groups.flatMap((g) => (Array.isArray(g.items) ? g.items : []))
-  const cleaned = items.map((x) => x.trim()).filter((x) => x !== '')
-  if (cleaned.length === 0) return null
+
+  function groupItems(name: string): string[] {
+    const g = groups.find((x) => x?.name?.toLowerCase() === name)
+    const items = Array.isArray(g?.items) ? g.items : []
+    return items.map((x) => x.trim()).filter((x) => x !== '')
+  }
+
+  const technical = groupItems('technical')
+  const leadership = groupItems('leadership')
+  const others = groupItems('others')
+
+  const any = technical.length + leadership.length + others.length
+  if (any === 0) return null
 
   return (
     <div className="rt__skills">
-      {cleaned.map((line, idx) => (
-        <div key={`skills-${idx}`} className="rt__skillsLine">
-          {line}
+      {technical.length > 0 ? (
+        <div className="rt__skillsRow">
+          <span className="rt__skillsLabel">Technical:</span> {technical.join(', ')}
         </div>
-      ))}
+      ) : null}
+      {leadership.length > 0 ? (
+        <div className="rt__skillsRow">
+          <span className="rt__skillsLabel">Leadership:</span> {leadership.join(', ')}
+        </div>
+      ) : null}
+      {others.length > 0 ? (
+        <div className="rt__skillsRow">
+          <span className="rt__skillsLabel">Others:</span> {others.join(', ')}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -157,8 +227,10 @@ export function ResumeTemplate({
             <ul className="rt__bullets rt__bullets--tight">
               {educationEntries.map((e) => (
                 <li key={e.id}>
-                  <div>{formatEducationLine(e)}</div>
-                  {hasBioDates(e.dates) && e.dates ? <BioDateLabels dates={e.dates} /> : null}
+                  <div className="rt__itemTop rt__itemTop--inList">
+                    <div>{formatEducationLine(e)}</div>
+                    {hasBioDates(e.dates) && e.dates ? <BioDateLabels dates={e.dates} /> : null}
+                  </div>
                 </li>
               ))}
             </ul>

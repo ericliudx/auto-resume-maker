@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchBioBank } from './bioApi'
 import type { BioBank } from './bioTypes'
-import { loadContact, saveContact, type ResumeContact } from './contact'
+import { hasStoredContact, loadContact, saveContact, type ResumeContact } from './contact'
+import { fetchContactFile } from './contactApi'
 import { ResumeTemplate } from './ResumeTemplate'
 
 function TextField({
@@ -45,6 +46,20 @@ export function ResumePreview({
         const msg = e instanceof Error ? e.message : 'Failed to load bio bank.'
         if (!cancelled) setError(msg)
       })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    // Prefer local edits (localStorage). If none exist, load from gitignored bio/contact.json.
+    if (hasStoredContact()) return
+    let cancelled = false
+    fetchContactFile()
+      .then((c) => {
+        if (!cancelled && c) setContact(c)
+      })
+      .catch(() => {})
     return () => {
       cancelled = true
     }

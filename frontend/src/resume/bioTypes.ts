@@ -10,6 +10,8 @@ export type BioExperience = {
   header?: string
   company?: string
   name?: string
+  title?: string
+  subtitle?: string
   dates?: BioDateRange
   bullets?: string[]
   tech?: string[]
@@ -20,6 +22,8 @@ export type BioProject = {
   type: 'project'
   name?: string
   role?: string
+  descriptor?: string
+  descriptor_variants?: string[]
   header?: string
   dates?: BioDateRange
   bullets?: string[]
