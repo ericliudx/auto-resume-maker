@@ -70,8 +70,9 @@ export function LlmPanel({
         title="LLM (tailor + ATS)"
         hint={
           <>
-            Tailor sends the general prompt, bio JSON, posting, and a deterministic ATS keyword appendix
-            (Role and Keywords below), then applies one JSON plan. Calls local{' '}
+            After you pause typing in the job posting, tailor runs automatically (same as Tailor). Tailor sends
+            the general prompt, bio JSON, posting, and a deterministic ATS keyword appendix (Role and Keywords
+            below), then applies one JSON plan; ATS score updates when that finishes. Calls local{' '}
             <code className="px-1 py-0.5 rounded bg-[var(--code-bg)]">POST /api/llm/chat</code> (Groq key
             server-side).
           </>

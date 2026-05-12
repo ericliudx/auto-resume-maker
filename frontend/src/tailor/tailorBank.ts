@@ -61,6 +61,8 @@ export function makeBankForPrompt(bank: BioBank): unknown {
     })),
     education: bank.education,
     skills: bank.skills,
+    summaries: bank.summaries ?? [],
+    certifications: bank.certifications ?? [],
   }
 }
 
