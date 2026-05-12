@@ -12,7 +12,7 @@ IMPORTANT: Do **not** edit the structure (section headings/order) of `.specify/l
 ## Feature context (fill this in first)
 
 - Feature name: _(kebab-case)_
-- Goal: _(what the user should be able to do; one tight paragraph)_
+- Goal: _(one sentence user outcome)_
 - Non-goals / out of scope:
   - _(explicit boundaries)_
 - Affected area(s): _(repo paths / subsystems)_

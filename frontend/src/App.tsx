@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ResumePreview } from "./resume/views/ResumePreview";
 import { SuperResumePreview } from "./resume/views/SuperResumePreview";
 import { AppHeader } from "./components/AppHeader";
 import { Panel, PanelBody } from "./components/Panels";
+import { BioBankViewer } from "./components/bioBankViewer";
 import { SegmentedTabs } from "./components/SegmentedTabs";
 import { LlmPanel } from "./components/LlmPanel";
 import { useLocalStorageState } from "./hooks/useLocalStorageState";
@@ -16,11 +17,15 @@ const JOB_POSTING_STORAGE_KEY = "auto-resume.jobPosting.v1";
 const ATS_ROLE_STORAGE_KEY = "auto-resume.atsRole.v1";
 const ATS_KEYWORD_LIMIT_STORAGE_KEY = "auto-resume.atsKeywordLimit.v1";
 const TAILOR_PLAN_STORAGE_KEY = "auto-resume.tailorPlanText.v1";
+/** After typing pauses, run tailor (then ATS via hook callback) without clicking Tailor. */
+const AUTO_TAILOR_DEBOUNCE_MS = 900;
 
 function App() {
   const isPrint =
     new URLSearchParams(window.location.search).get("print") === "1";
-  const [resumeView, setResumeView] = useState<"resume" | "super">("resume");
+  const [resumeView, setResumeView] = useState<"resume" | "super" | "bio">(
+    "resume",
+  );
 
   const [jobPostingText, setJobPostingText] = useLocalStorageState(
     JOB_POSTING_STORAGE_KEY,
@@ -35,11 +40,11 @@ function App() {
     applyDeterministicPlan,
     clearTailor,
   } = useLlmTools({
-    onTailorPlanApplied: ({ role, keywordLimit }) => {
+    onTailorPlanApplied: ({ role, keywordLimit, jobPostingText: jobForAts }) => {
       setAtsRole(role);
       setAtsKeywordLimit(keywordLimit);
       void analyze({
-        jobPostingText,
+        jobPostingText: jobForAts,
         role,
         limit: keywordLimit,
       });
@@ -56,6 +61,24 @@ function App() {
     25,
     { min: 10, max: 60 },
   );
+  const atsRoleRef = useRef(atsRole);
+  const atsKeywordLimitRef = useRef(atsKeywordLimit);
+  useEffect(() => {
+    atsRoleRef.current = atsRole;
+    atsKeywordLimitRef.current = atsKeywordLimit;
+  }, [atsRole, atsKeywordLimit]);
+
+  useEffect(() => {
+    const trimmed = jobPostingText.trim();
+    if (!trimmed) return;
+    const t = window.setTimeout(() => {
+      void tailorResume(jobPostingText, {
+        atsRole: atsRoleRef.current as AtsRole,
+        atsKeywordLimit: atsKeywordLimitRef.current,
+      });
+    }, AUTO_TAILOR_DEBOUNCE_MS);
+    return () => window.clearTimeout(t);
+  }, [jobPostingText, tailorResume]);
   const [planText, setPlanText] = useLocalStorageState(
     TAILOR_PLAN_STORAGE_KEY,
     "",
@@ -86,8 +109,16 @@ function App() {
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <Panel
             ariaLabel="Resume viewer"
-            title={`Resume${tailoredBank ? " (tailored)" : ""}`}
-            hint="Locked template (stable structure)"
+            title={
+              resumeView === "bio"
+                ? "Bio bank"
+                : `Resume${tailoredBank ? " (tailored)" : ""}`
+            }
+            hint={
+              resumeView === "bio"
+                ? "Everything under bio/ on disk; green Resume tags mark items on the tailored resume when a patch is saved."
+                : "Locked template (stable structure)"
+            }
             right={
               <SegmentedTabs
                 ariaLabel="Resume views"
@@ -96,6 +127,7 @@ function App() {
                 tabs={[
                   { id: "resume", label: "Resume" },
                   { id: "super", label: "Super-resume" },
+                  { id: "bio", label: "Bio bank" },
                 ]}
               />
             }
@@ -107,13 +139,26 @@ function App() {
                   "bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]",
                   // App-only "page view" scale: scale the sheet, not the toolbar/canvas chrome.
                   "[&_.rt]:origin-top [&_.rt]:transform [&_.rt]:scale-[0.88]",
+                  resumeView === "bio" ? "hidden" : "",
                 ].join(" ")}
               >
                 {resumeView === "resume" ? (
                   <ResumePreview mode="app" bankOverride={tailoredBank} />
-                ) : (
+                ) : resumeView === "super" ? (
                   <SuperResumePreview bankOverride={tailoredBank} />
-                )}
+                ) : null}
+              </div>
+              <div
+                className={[
+                  "min-h-0 min-w-0 flex-1 flex flex-col m-0 px-4 py-3.5 overflow-hidden",
+                  "bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]",
+                  resumeView === "bio" ? "" : "hidden",
+                ].join(" ")}
+              >
+                <BioBankViewer
+                  tailoredResumeBank={tailoredBank}
+                  active={resumeView === "bio"}
+                />
               </div>
             </PanelBody>
           </Panel>

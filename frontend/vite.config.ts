@@ -18,6 +18,8 @@ type BioBankResponse =
         projects: unknown[]
         education: unknown[]
         skills: unknown[]
+        summaries: unknown[]
+        certifications: unknown[]
       }
     }
   | { ok: false; error: { code: 'not_found' | 'bad_request' | 'server_error'; message: string } }
@@ -491,12 +493,15 @@ function createBioApiPlugin(): Plugin {
             return
           }
 
-          const [experiences, projects, education, skills] = await Promise.all([
-            readJsonDir('experiences'),
-            readJsonDir('projects'),
-            readJsonDir('education'),
-            readJsonDir('skills'),
-          ])
+          const [experiences, projects, education, skills, summaries, certifications] =
+            await Promise.all([
+              readJsonDir('experiences'),
+              readJsonDir('projects'),
+              readJsonDir('education'),
+              readJsonDir('skills'),
+              readJsonDir('summaries'),
+              readJsonDir('certifications'),
+            ])
 
           res.statusCode = 200
           res.setHeader('content-type', 'application/json')
@@ -508,6 +513,8 @@ function createBioApiPlugin(): Plugin {
                 projects: sortDocsNewestFirst(projects),
                 education,
                 skills,
+                summaries,
+                certifications,
               },
             } satisfies BioBankResponse),
           )

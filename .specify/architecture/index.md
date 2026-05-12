@@ -10,6 +10,7 @@
 |------|------------------|----------------|
 | Entry / app shell | `frontend/` | Local web UI entrypoint and app shell |
 | Core domain (bank + tailor) | `frontend/src/resume/data/`, `frontend/src/tailor/` | Bio bank types, tailor patch shape, apply pipeline, `useResumeData` merge with stored patch |
+| Bio bank panel (read-only UI) | `frontend/src/components/bioBankViewer/` | Full-disk bio viewer: section cards, contact block, JSON collapsibles; `useBioBankPanelData` fetches bank + contact when the tab is active |
 | Resume UI + fit | `frontend/src/resume/` (excluding `data/` as “domain types”) | Template, fitter, previews, print route |
 | Adapters | `frontend/vite.config.ts` (middleware) | Local-only `GET /api/bio/*`, `POST /api/llm/chat` |
 | Tests | `frontend/` (TBD) | Frontend lint/typecheck now; add tests when behavior warrants |
@@ -55,7 +56,7 @@ The `llm-api` feature currently implements a **local-only** LLM proxy inside the
 The app reads resume source material from the repo’s `bio/` folder via a local-only dev-server endpoint:
 
 - **Endpoint**: `GET /api/bio/bank`
-- **Returns**: aggregated JSON from `bio/education/`, `bio/experiences/`, `bio/projects/`, `bio/skills/`
+- **Returns**: aggregated JSON from `bio/experiences/`, `bio/projects/`, `bio/education/`, `bio/skills/`, plus `bio/summaries/` and `bio/certifications/` (empty arrays when those folders are missing or have no `.json` files yet).
 - **Implementation**: Vite middleware in `frontend/vite.config.ts` (read-only)
 - **Ordering**: `experiences` and `projects` are sorted **newest-first** by `dates.end_date` (missing ⇒ “present”) then `dates.start_date`. This keeps the resume output stable regardless of filenames.
 

@@ -56,6 +56,10 @@ export type BioBank = {
   projects: BioProject[]
   education: BioEducation[]
   skills: BioSkills[]
+  /** `bio/summaries/*.json` (optional for older responses; dev server sends []). */
+  summaries?: unknown[]
+  /** `bio/certifications/*.json` (optional for older responses; dev server sends []). */
+  certifications?: unknown[]
 }
 
 export type BioBankResponse =
