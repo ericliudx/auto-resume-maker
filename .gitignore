@@ -1,3 +1,6 @@
 # Ignore all resume source material on disk (local-only)
 bio/
 
+# Local venv used only for one-off git-filter-repo installs
+.venv-filter-repo/
+
