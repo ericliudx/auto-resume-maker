@@ -1,0 +1,1 @@
+export { BioBankViewer } from './BioBankViewer'

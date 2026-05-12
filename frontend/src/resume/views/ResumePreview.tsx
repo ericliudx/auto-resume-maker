@@ -3,7 +3,7 @@ import { useResumeData } from "../hooks/useResumeData";
 import { ResumeScope } from "../ui/ResumeScope";
 import { ResumeCanvas, ResumeError, ResumeToolbar } from "../ui/ResumeShell";
 import { ContactEditor } from "../ui/ContactEditor";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { BioBank } from "../data/bioTypes";
 import { ResumeTemplate } from "../ResumeTemplate";
 import { loadTailorPatch } from "../../tailor/tailorStorage";
@@ -23,8 +23,6 @@ export function ResumePreview({
     useResumeData();
   const [showContact, setShowContact] = useState<boolean>(false);
   const [fitEnabled, setFitEnabled] = useState<boolean>(true);
-  const contactRef = useRef(contact);
-  contactRef.current = contact;
   const [fitInfo, setFitInfo] = useState<{
     cfg: {
       expLimit: number;
@@ -109,7 +107,7 @@ export function ResumePreview({
 
     const prevTitle = document.title;
     const patch = loadTailorPatch();
-    document.title = documentTitleForPrint(contactRef.current, patch);
+    document.title = documentTitleForPrint(contact, patch);
 
     const t = window.setTimeout(() => window.print(), 80);
 
@@ -124,7 +122,7 @@ export function ResumePreview({
       restoreTitle();
       if (import.meta.env.DEV) resumePrintAutoLock = false;
     };
-  }, [mode, bank, contactSynced, error]);
+  }, [mode, bank, contactSynced, error, contact]);
 
   if (mode === "print") {
     return (

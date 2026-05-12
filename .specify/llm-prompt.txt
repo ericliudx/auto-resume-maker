@@ -11,20 +11,13 @@ IMPORTANT: Do **not** edit the structure (section headings/order) of `.specify/l
 
 ## Feature context (fill this in first)
 
-- Feature name: llm-tailor
-- Goal: use llm api, bank of experiences/projects, to create the best tailored resume with highest chance of keyword/ats/moving to the next round
+- Feature name: _(kebab-case)_
+- Goal: _(one sentence user outcome)_
 - Non-goals / out of scope:
-  - Guaranteeing ATS outcomes or “keyword optimization” claims (assistive tailoring only)
-  - Multi-user hosting, auth, or exposing LLM calls to the public internet (local-only)
-  - Writing back to the `bio/` bank (bank remains canonical + read-only at runtime)
-  - Changing the locked resume template structure (section order/headings/print CSS)
-  - Auto-applying to jobs / scraping job boards / background agents
-- Affected area(s): frontend (resume tailoring UI + fit), adapters (local LLM + local bio API usage), bio/ (read-only bank inputs)
+  - _(explicit boundaries)_
+- Affected area(s): _(repo paths / subsystems)_
 - Links (optional):
-  - `.specify/vision.md`
-  - `.specify/architecture/index.md`
-  - `.specify/features/completed/llm-api/`
-  - `.specify/features/completed/resume-template/`
+  - _(paths to vision, architecture, related feature folders)_
 
 ## Determine scope + boundaries
 

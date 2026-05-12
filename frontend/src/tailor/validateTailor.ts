@@ -1,6 +1,8 @@
 import type { BioBank } from '../resume/data/bioTypes'
 import type { TailorModelResult } from './tailorTypes'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
+import { capRelevantCoursesList } from './relevantCoursesCap'
+import { sanitizeResumeTypography } from './resumeTypography'
 
 function uniqueStrings(xs: unknown): string[] {
   if (!Array.isArray(xs)) return []
@@ -41,7 +43,7 @@ export function validateTailorResult(args: {
   if (badProj.length) return { ok: false, message: `Model used unknown projectIds: ${badProj.join(', ')}` }
 
   const MAX_IDS = 12
-  const { pdfFileName: pdfRaw, ...resultRest } = result
+  const { pdfFileName: pdfRaw, relevantCourses: rcIn, ...resultRest } = result
   const pdfSanitized = sanitizePdfFileNameForPlan(pdfRaw)
   if (mode === 'default' && !pdfSanitized) {
     return {
@@ -50,11 +52,14 @@ export function validateTailorResult(args: {
         'Model must return a valid top-level pdfFileName (First_Last_Company: at least three ASCII segments separated by underscores, e.g. Eric_Liu_Affirm).',
     }
   }
+  const relevantCoursesRaw = uniqueStrings(rcIn).map((c) => sanitizeResumeTypography(c))
+  const relevantCourses = capRelevantCoursesList(relevantCoursesRaw) ?? []
   const normalized: TailorModelResult = {
     ...resultRest,
     experienceIds: expIds.slice(0, MAX_IDS),
     projectIds: projIds.slice(0, MAX_IDS),
     ...(pdfSanitized ? { pdfFileName: pdfSanitized } : {}),
+    ...(relevantCourses.length ? { relevantCourses } : {}),
   }
 
   const expPatchIds = new Set((normalized.experiences ?? []).map((e) => e.id))
