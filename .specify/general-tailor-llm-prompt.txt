@@ -30,9 +30,11 @@ This repo includes a resume app that can deterministically apply a pasted JSON �
    - Use **exactly 3** `experienceIds` whenever the bank has at least three experiences, and **exactly 3** `projectIds` whenever the bank has at least three projects; if the bank has fewer in either category, include every experience or every project available (still at least 1 of each when the bank contains any).
    - Order IDs most relevant to the posting first.
 
-3) Rewrite bullets for those selected experiences/projects:
-   - **Experience bullets by order in `experienceIds`:** the **first two** roles (most relevant) get **exactly three bullets** each; any **third** selected role gets **exactly two bullets**. When the bank has only one or two experiences, still use three bullets per role when you have three strong lines; otherwise use as many strong bullets as you can up to the cap (never pad with filler).
-   - **Projects:** **exactly two bullets** for each selected project (three projects → 2+2+2). Never 0 bullets for a selected item.
+3) Rewrite bullets for those selected experiences/projects (**synthesize from the whole bank, write only the allowed count into the patch**):
+   - For **each** selected experience and project id, read **every** `bullets[]` entry (and headers, tech, dates) for that id in the aggregated bank JSON. The bio may have **any number** of bullets; use **all of them** as source material—nothing should be ignored because it appears late in the list.
+   - **Summarize and rephrase** that full story into **exactly** the output line counts below. This is **compression + job targeting**: merge ideas from multiple bio bullets into fewer, tighter lines; weave posting keywords where truthful. The strings you put in `experiencePatches` / `projectPatches` → `bullets` must be **newly composed** for this posting. **Do not** fill the patch by copying bio lines 1..N unchanged to match the count; verbatim reuse of a bio bullet should be rare and only when it is already the best possible line for this role.
+   - **Experience output counts** (order = `experienceIds`): list positions **0** and **1** → **exactly three** bullets each; position **2** (when you list a third experience id) → **exactly two** bullets. If the bank has fewer than three experiences, include every experience id available and apply the same pattern to those positions only (e.g. a single experience id still gets **three** synthesized bullets).
+   - **Project output counts:** **exactly two** bullets per selected project. Never 0 bullets for a selected item; never pad with filler if you lack substance—pick a different project or tighten scope instead.
    - Use the job posting’s exact phrases when they are truthful equivalents
    - Prefer impact + clarity (action + outcome)
    - Avoid vague filler (“worked on”, “helped”, “responsible for”)
@@ -73,7 +75,7 @@ This repo includes a resume app that can deterministically apply a pasted JSON �
 }
 
 Notes:
-- The app **truncates** patch bullets: **3 per experience** for the first two IDs in `experienceIds`, **2** for the third experience, and **2 per project** if the model returns too many; you should still output the full target counts above so wording is intentional.
+- The app **truncates** patch bullets only as a safety cap: **3** for each of the first two `experienceIds`, **2** for the third experience id, **2** per project. Your job is to output **exactly** those counts of **fresh** lines after synthesizing **all** bank bullets for each id—not to echo the first N bio lines.
 - `pdfFileName` is required in the JSON for LLM-driven tailor in the app; pasted deterministic plans may still omit it (then print falls back to `First_Last_Resume` from contact). Invalid `pdfFileName` values are rejected.
 - `skillsGroups` replaces only the bio `technical` row; `leadership` and `others` are never taken from the plan. Each skills row on the resume shows at most 10 items.
 - `experiencePatches`/`projectPatches` must include patches ONLY for the IDs you selected.

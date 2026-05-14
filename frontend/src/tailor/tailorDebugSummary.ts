@@ -7,6 +7,19 @@ function preview(s: string, max = 76): string {
   return t.length <= max ? t : `${t.slice(0, max)}…`
 }
 
+/** Per-index trim compare: how many patch lines differ from bio at the same index. */
+function countRewrittenLines(base?: string[], patch?: string[]): { changed: number; total: number } {
+  if (!Array.isArray(patch) || patch.length === 0) return { changed: 0, total: 0 }
+  const b = base ?? []
+  let changed = 0
+  for (let i = 0; i < patch.length; i++) {
+    const bi = (b[i] ?? '').trim()
+    const pi = (patch[i] ?? '').trim()
+    if (bi !== pi) changed++
+  }
+  return { changed, total: patch.length }
+}
+
 function bulletSummary(
   kind: string,
   id: string,
@@ -27,16 +40,27 @@ function bulletSummary(
   const patchN = hasPatchBullets ? patch.bullets.length : 0
 
   if (hasPatchBullets) {
+    const { changed, total } = countRewrittenLines(baseItem?.bullets, patch.bullets)
+    const unchanged = total - changed
     const sameFirst =
       baseN > 0 &&
-      patch.bullets![0] === baseItem?.bullets?.[0]
+      (patch.bullets![0] ?? '').trim() === (baseItem?.bullets?.[0] ?? '').trim()
+    const head =
+      unchanged === 0
+        ? 'all lines match bio at same indices (no wording change)'
+        : changed === total
+          ? 'all lines differ from bio at same indices'
+          : `${changed}/${total} lines differ from bio (same index); ${unchanged} unchanged (often the lead line is kept on purpose)`
     out.push(
-      `  ${kind} [${id}] bio had ${baseN} bullets; patch replaces with ${patchN}${sameFirst ? ' (first bullet identical to bio — check other bullets)' : ''}.`,
+      `  ${kind} [${id}] bio had ${baseN} bullets; patch applies ${patchN} bullets — ${head}${sameFirst && changed > 0 ? '; line 0 same text' : ''}.`,
     )
     out.push(`  bio[0]:  ${preview((baseItem?.bullets ?? [])[0] ?? '')}`)
     out.push(`  new[0]:  ${preview(patch.bullets![0] ?? '')}`)
     if (patchN > 1) {
       out.push(`  new[1]:  ${preview(patch.bullets![1] ?? '')}`)
+    }
+    if (patchN > 2 && changed > 0) {
+      out.push(`  new[2]:  ${preview(patch.bullets![2] ?? '')}`)
     }
   } else {
     out.push(
@@ -76,6 +100,7 @@ export function buildTailorApplyDebug(base: BioBank, patch: TailorModelResult): 
   }
 
   lines.push(
+    'Tip: “Line 0 same” with 2/3 lines changed still means tailoring on other bullets. If every line matches bio, the model echoed the bank.',
     'Tip: If you see “no bullets array”, the model did not send rewrites for that id; check raw JSON on a failed parse or log the API response.',
   )
 
