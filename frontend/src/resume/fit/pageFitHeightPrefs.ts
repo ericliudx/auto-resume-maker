@@ -6,7 +6,7 @@ export const PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN = 10;
 
 export const PAGE_FIT_EXTRA_HEIGHT_MIN = -48;
 export const PAGE_FIT_EXTRA_HEIGHT_MAX = 120;
-export const PAGE_FIT_EXTRA_HEIGHT_DEFAULT = 36;
+export const PAGE_FIT_EXTRA_HEIGHT_DEFAULT = 0;
 export const PAGE_FIT_EXTRA_HEIGHT_STEP = 4;
 
 export function clampPageFitExtraHeightPx(n: number): number {
