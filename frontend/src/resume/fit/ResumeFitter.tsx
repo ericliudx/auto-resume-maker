@@ -1,189 +1,14 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { BioBank, BioExperience, BioProject } from "../data/bioTypes";
+import type { BioBank } from "../data/bioTypes";
 import type { ResumeContact } from "../data/contact";
 import { PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN } from "./pageFitHeightPrefs";
+import { applyFit, buildInitialFitConfig } from "./resumeFitApply";
+import { inchToPx } from "./resumeFitMath";
+import { nextTighterConfig } from "./resumeFitTighten";
+import type { FitConfig } from "./resumeFitTypes";
 import { ResumeTemplate } from "../ResumeTemplate";
 
-export type FitConfig = {
-  expLimit: number;
-  projLimit: number;
-  /** Bullet caps per `bank.experiences` index; only indices `< expLimit` are shown. */
-  experienceBulletCounts: number[];
-  /** Bullet caps per `bank.projects` index; only indices `< projLimit` are shown. */
-  projectBulletCounts: number[];
-  /**
-   * Round-robin phase for experience bullet trims (bottom → … → top, repeat).
-   * Cycle position `p` maps to experience index `expLimit - 1 - p`.
-   */
-  experienceTrimCursor: number;
-  /**
-   * Round-robin phase for project bullet trims (bottom → … → top, repeat).
-   * Cycle position `p` maps to project index `projLimit - 1 - p`.
-   */
-  projectTrimCursor: number;
-};
-
-/** Do not drop below this many whole projects when the bank has at least this many (matches tailored cap of 3). */
-const RESUME_FIT_MIN_WHOLE_PROJECTS = 3;
-
-function minWholeProjectFloor(bank: BioBank): number {
-  if (bank.projects.length === 0) return 0;
-  return Math.min(RESUME_FIT_MIN_WHOLE_PROJECTS, bank.projects.length);
-}
-
-function clampInt(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, Math.trunc(n)));
-}
-
-function maxBulletsForItem(
-  item: { bullets?: string[] },
-  cap: number,
-): number {
-  const n = Array.isArray(item.bullets) ? item.bullets.length : 0;
-  return clampInt(n || 1, 1, cap);
-}
-
-function initialProjectBulletCounts(bank: BioBank): number[] {
-  return bank.projects.map((p) => maxBulletsForItem(p, 6));
-}
-
-function initialExperienceBulletCounts(bank: BioBank): number[] {
-  return bank.experiences.map((e) => maxBulletsForItem(e, 6));
-}
-
-/**
- * Remove one experience bullet using bottom→top round-robin (e.g. 3-3 → 3-2 → 2-2 → …).
- */
-function trimOneExperienceBulletRoundRobin(
-  cfg: FitConfig,
-  bank: BioBank,
-): FitConfig | null {
-  const L = clampInt(cfg.expLimit, 0, bank.experiences.length);
-  if (L === 0) return null;
-
-  const cursor = ((cfg.experienceTrimCursor % L) + L) % L;
-
-  for (let step = 0; step < L; step++) {
-    const pos = (cursor + step) % L;
-    const idx = L - 1 - pos;
-    if (cfg.experienceBulletCounts[idx] > 1) {
-      const nextCounts = cfg.experienceBulletCounts.slice();
-      nextCounts[idx] -= 1;
-      const nextCursor = (cursor + step + 1) % L;
-      return {
-        ...cfg,
-        experienceBulletCounts: nextCounts,
-        experienceTrimCursor: nextCursor,
-      };
-    }
-  }
-  return null;
-}
-
-/**
- * Remove one bullet using bottom→top round-robin (e.g. 3-3-3 → 3-3-2 → 3-2-2 → 2-2-2 → …).
- * Skips projects already at the minimum of one visible bullet.
- */
-function trimOneProjectBulletRoundRobin(
-  cfg: FitConfig,
-  bank: BioBank,
-): FitConfig | null {
-  const L = clampInt(cfg.projLimit, 0, bank.projects.length);
-  if (L === 0) return null;
-
-  const cursor = ((cfg.projectTrimCursor % L) + L) % L;
-
-  for (let step = 0; step < L; step++) {
-    const pos = (cursor + step) % L;
-    const idx = L - 1 - pos;
-    if (cfg.projectBulletCounts[idx] > 1) {
-      const nextCounts = cfg.projectBulletCounts.slice();
-      nextCounts[idx] -= 1;
-      const nextCursor = (cursor + step + 1) % L;
-      return {
-        ...cfg,
-        projectBulletCounts: nextCounts,
-        projectTrimCursor: nextCursor,
-      };
-    }
-  }
-  return null;
-}
-
-function nextTighterConfig(
-  cfg: FitConfig,
-  base: FitConfig,
-  bank: BioBank,
-): FitConfig | null {
-  // Tighten in a deterministic order:
-  // 1) one project bullet, round-robin bottom→top → 2) project count (not below 3 when possible) →
-  // 3) one experience bullet, round-robin bottom→top → 4) experience count.
-  // NOTE: header + skills are treated as fixed; we only tighten experiences/projects.
-  const projBullet = trimOneProjectBulletRoundRobin(cfg, bank);
-  if (projBullet) return projBullet;
-  const projFloor = minWholeProjectFloor(bank);
-  if (cfg.projLimit > projFloor)
-    return {
-      ...cfg,
-      projLimit: cfg.projLimit - 1,
-      projectBulletCounts: base.projectBulletCounts.slice(),
-      projectTrimCursor: 0,
-    };
-  const expBullet = trimOneExperienceBulletRoundRobin(cfg, bank);
-  if (expBullet) return expBullet;
-  if (cfg.expLimit > 1)
-    return {
-      ...cfg,
-      expLimit: cfg.expLimit - 1,
-      experienceBulletCounts: base.experienceBulletCounts.slice(),
-      experienceTrimCursor: 0,
-    };
-  return null;
-}
-
-function applyFit(bank: BioBank, cfg: FitConfig): BioBank {
-  const expLimit = clampInt(cfg.expLimit, 0, bank.experiences.length);
-  const projLimit = clampInt(cfg.projLimit, 0, bank.projects.length);
-
-  const experiences: BioExperience[] = bank.experiences
-    .slice(0, expLimit)
-    .map((e, idx) => ({
-      ...e,
-      bullets: Array.isArray(e.bullets)
-        ? e.bullets.slice(
-            0,
-            clampInt(cfg.experienceBulletCounts[idx] ?? 1, 1, 99),
-          )
-        : e.bullets,
-    }));
-
-  const projects: BioProject[] = bank.projects
-    .slice(0, projLimit)
-    .map((p, idx) => ({
-      ...p,
-      bullets: Array.isArray(p.bullets)
-        ? p.bullets.slice(
-            0,
-            clampInt(cfg.projectBulletCounts[idx] ?? 1, 1, 99),
-          )
-        : p.bullets,
-    }));
-
-  return { ...bank, experiences, projects };
-}
-
-function inchToPx(inches: number): number {
-  const el = document.createElement("div");
-  el.style.width = "1in";
-  el.style.height = "1in";
-  el.style.position = "absolute";
-  el.style.left = "-10000px";
-  el.style.top = "-10000px";
-  document.body.appendChild(el);
-  const pxPerInch = el.getBoundingClientRect().height || 96;
-  document.body.removeChild(el);
-  return inches * pxPerInch;
-}
+export type { FitConfig };
 
 export function ResumeFitter({
   bank,
@@ -205,19 +30,9 @@ export function ResumeFitter({
   const baseCfgRef = useRef<FitConfig | null>(null);
   const fitLoopKeyRef = useRef<string>("");
   const tighteningRef = useRef<boolean>(false);
-  const baseCfg = useMemo<FitConfig>(() => {
-    // Start "as full as possible", then tighten until it fits.
-    return {
-      expLimit: bank.experiences.length,
-      projLimit: bank.projects.length,
-      experienceBulletCounts: initialExperienceBulletCounts(bank),
-      projectBulletCounts: initialProjectBulletCounts(bank),
-      experienceTrimCursor: 0,
-      projectTrimCursor: 0,
-    };
-  }, [bank]);
+  const baseCfg = useMemo<FitConfig>(() => buildInitialFitConfig(bank), [bank]);
 
-  const [cfg, setCfg] = useState<FitConfig>(() => baseCfg);
+  const [cfg, setCfg] = useState<FitConfig>(() => buildInitialFitConfig(bank));
 
   const fittedBank = useMemo(() => applyFit(bank, cfg), [bank, cfg]);
 
