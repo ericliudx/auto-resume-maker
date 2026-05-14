@@ -11,7 +11,7 @@ As a user tailoring locally, I want the app to call the existing Groq-backed `PO
 - User pastes a job posting in the Job posting panel.
 - User clicks **Tailor** in the LLM panel.
 - The app loads the bio bank from `GET /api/bio/bank`, builds a user prompt from `.specify/general-tailor-llm-prompt.txt` plus aggregated bank JSON plus the job text plus a **deterministic ATS keyword appendix** (same extraction and scoring as **Analyze ATS**, using the panel’s Role and Keywords limit), and sends a **single** request to `POST /api/llm/chat`.
-- On success, the app parses the model output (JSON object, optionally followed by a `BIGGEST_GAPS:` section), validates the plan, applies it to a derived bank (same rules as before: selection up to **3 experiences** and **3 projects**, bullets capped to **2 per experience** and **2 per project**, technical skills row, print filename), applies `relevantCourses` to the `course_bank` education doc when present, persists the patch to `localStorage`, and refreshes the preview.
+- On success, the app parses the model output (JSON object, optionally followed by a `BIGGEST_GAPS:` section), validates the plan, applies it to a derived bank (same rules as before: selection up to **3 experiences** and **3 projects**, bullets capped to **3+3+2** for experiences in `experienceIds` order and **2 per project**, technical skills row, print filename), applies `relevantCourses` to the `course_bank` education doc when present, persists the patch to `localStorage`, and refreshes the preview.
 - ATS role and keyword limit controls update from the plan’s `role` and `keywordLimit` when possible, and **Analyze ATS** is re-run so scores align.
 
 ### Deterministic plan (unchanged)

@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { BioBank } from "../data/bioTypes";
 import type { ResumeContact } from "../data/contact";
 import { PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN } from "./pageFitHeightPrefs";
-import { applyFit, buildInitialFitConfig } from "./resumeFitApply";
+import { applyFit, buildInitialFitConfig, cloneFitConfig } from "./resumeFitApply";
 import { inchToPx } from "./resumeFitMath";
 import { nextTighterConfig } from "./resumeFitTighten";
 import type { FitConfig } from "./resumeFitTypes";
@@ -62,11 +62,19 @@ export function ResumeFitter({
 
     const bankKey = `${bank.experiences.map((e) => e.id).join("|")}::${bank.projects.map((p) => p.id).join("|")}`;
     const fitLoopKey = `${bankKey}#${pageFitExtraHeightPx}`;
-    if (fitLoopKeyRef.current !== fitLoopKey) {
+    const keyJustChanged = fitLoopKeyRef.current !== fitLoopKey;
+
+    let rafId = 0;
+    if (keyJustChanged) {
       fitLoopKeyRef.current = fitLoopKey;
       baseCfgRef.current = baseCfg;
-      const raf = window.requestAnimationFrame(() => setCfg(baseCfg));
-      return () => window.cancelAnimationFrame(raf);
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        const b = baseCfgRef.current ?? baseCfg;
+        // Always a new object so React re-runs this effect even when values match `baseCfg`
+        // (otherwise we skip attaching ResizeObserver and the height slider appears stuck).
+        setCfg(cloneFitConfig(b));
+      });
     }
     baseCfgRef.current = baseCfg;
 
@@ -90,11 +98,16 @@ export function ResumeFitter({
       });
     }
 
-    checkAndTighten();
+    if (!keyJustChanged) {
+      checkAndTighten();
+    }
 
     const ro = new ResizeObserver(() => checkAndTighten());
     ro.observe(rt);
-    return () => ro.disconnect();
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
   }, [bank, cfg, target, pageFitExtraHeightPx, baseCfg]);
 
   return (

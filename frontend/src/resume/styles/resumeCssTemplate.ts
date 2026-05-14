@@ -12,7 +12,7 @@ export const RESUME_CSS_TEMPLATE = `
   border-radius: 10px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
   font-family: 'Times New Roman', Times, serif;
-  font-size: 11pt;
+  font-size: 11.5pt;
   line-height: 1.12;
 }
 
@@ -23,13 +23,13 @@ export const RESUME_CSS_TEMPLATE = `
 
 .resumeScope .rt__name {
   font-weight: 700;
-  font-size: 18pt;
+  font-size: 19pt;
   letter-spacing: 0;
 }
 
 .resumeScope .rt__contact {
   margin-top: 2px;
-  font-size: 11pt;
+  font-size: 11.5pt;
   color: #000;
 }
 
@@ -48,7 +48,7 @@ export const RESUME_CSS_TEMPLATE = `
 
 .resumeScope .rt__sectionTitle {
   font-weight: 700;
-  font-size: 11pt;
+  font-size: 11.5pt;
   letter-spacing: 0;
   color: #000;
   border-bottom: 1px solid #000;
@@ -73,7 +73,7 @@ export const RESUME_CSS_TEMPLATE = `
 
 .resumeScope .rt__itemHeader {
   font-weight: 700;
-  font-size: 11pt;
+  font-size: 11.5pt;
 }
 
 .resumeScope .rt__mutedItalic {
@@ -84,11 +84,11 @@ export const RESUME_CSS_TEMPLATE = `
 .resumeScope .rt__subline {
   margin-top: 1px;
   font-style: italic;
-  font-size: 11pt;
+  font-size: 11.5pt;
 }
 
 .resumeScope .rt__itemDates {
-  font-size: 11pt;
+  font-size: 11.5pt;
   color: #000;
   white-space: nowrap;
   text-align: right;
@@ -99,7 +99,7 @@ export const RESUME_CSS_TEMPLATE = `
   padding-left: 18px;
   list-style: disc;
   list-style-position: outside;
-  font-size: 11pt;
+  font-size: 11.5pt;
   color: #000;
 }
 
@@ -113,7 +113,7 @@ export const RESUME_CSS_TEMPLATE = `
 
 .resumeScope .rt__courses {
   margin-top: 6px;
-  font-size: 11pt;
+  font-size: 11.5pt;
   color: #000;
 }
 
@@ -122,7 +122,7 @@ export const RESUME_CSS_TEMPLATE = `
 }
 
 .resumeScope .rt__skillsRow {
-  font-size: 11pt;
+  font-size: 11.5pt;
   margin-bottom: 2px;
 }
 

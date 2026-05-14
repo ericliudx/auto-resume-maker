@@ -7,7 +7,7 @@ import {
   MAX_TAILOR_EXPERIENCES,
   MAX_TAILOR_PROJECTS,
 } from './tailorSelectionCap'
-import { capExperiencePatchBullets, capProjectPatchBullets } from './tailorPatchBulletCaps'
+import { capExperiencePatchBulletsOrdered, capProjectPatchBullets } from './tailorPatchBulletCaps'
 
 function uniqueStrings(xs: unknown): string[] {
   if (!Array.isArray(xs)) return []
@@ -58,11 +58,13 @@ export function validateTailorResult(args: {
   }
   const relevantCoursesRaw = uniqueStrings(rcIn).map((c) => sanitizeResumeTypography(c))
   const relevantCourses = capRelevantCoursesList(relevantCoursesRaw) ?? []
+  const experienceIdsNorm = expIds.slice(0, MAX_TAILOR_EXPERIENCES)
+  const projectIdsNorm = projIds.slice(0, MAX_TAILOR_PROJECTS)
   const normalized: TailorModelResult = {
     ...resultRest,
-    experienceIds: expIds.slice(0, MAX_TAILOR_EXPERIENCES),
-    projectIds: projIds.slice(0, MAX_TAILOR_PROJECTS),
-    experiences: capExperiencePatchBullets(resultRest.experiences),
+    experienceIds: experienceIdsNorm,
+    projectIds: projectIdsNorm,
+    experiences: capExperiencePatchBulletsOrdered(resultRest.experiences, experienceIdsNorm),
     projects: capProjectPatchBullets(resultRest.projects),
     ...(pdfSanitized ? { pdfFileName: pdfSanitized } : {}),
     ...(relevantCourses.length ? { relevantCourses } : {}),

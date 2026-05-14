@@ -21,6 +21,15 @@ export function buildInitialFitConfig(bank: BioBank): FitConfig {
   };
 }
 
+/** Fresh object reference for React state (same values as `cfg`). */
+export function cloneFitConfig(cfg: FitConfig): FitConfig {
+  return {
+    ...cfg,
+    experienceBulletCounts: [...cfg.experienceBulletCounts],
+    projectBulletCounts: [...cfg.projectBulletCounts],
+  };
+}
+
 export function applyFit(bank: BioBank, cfg: FitConfig): BioBank {
   const expLimit = clampInt(cfg.expLimit, 0, bank.experiences.length);
   const projLimit = clampInt(cfg.projLimit, 0, bank.projects.length);

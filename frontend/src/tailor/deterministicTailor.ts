@@ -8,7 +8,7 @@ import {
   MAX_TAILOR_EXPERIENCES,
   MAX_TAILOR_PROJECTS,
 } from './tailorSelectionCap'
-import { capExperiencePatchBullets, capProjectPatchBullets } from './tailorPatchBulletCaps'
+import { capExperiencePatchBulletsOrdered, capProjectPatchBullets } from './tailorPatchBulletCaps'
 
 function norm(s: string): string {
   return s.toLowerCase()
@@ -79,10 +79,11 @@ export function generateDeterministicTailorPatch(args: {
       Array.isArray(plan.relevantCourses) && plan.relevantCourses.length
         ? capRelevantCoursesList(plan.relevantCourses.filter((c): c is string => typeof c === 'string'))
         : undefined
+    const expIdsSliced = plan.experienceIds.slice(0, MAX_TAILOR_EXPERIENCES)
     return {
       experienceIds: plan.experienceIds,
       projectIds: plan.projectIds,
-      experiences: capExperiencePatchBullets(plan.experiencePatches),
+      experiences: capExperiencePatchBulletsOrdered(plan.experiencePatches, expIdsSliced),
       projects: capProjectPatchBullets(plan.projectPatches),
       skills: plan.skillsGroups ? { groups: plan.skillsGroups } : undefined,
       ...(pdfFileName ? { pdfFileName } : {}),
