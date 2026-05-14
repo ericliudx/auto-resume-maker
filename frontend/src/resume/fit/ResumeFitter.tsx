@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { BioBank, BioExperience, BioProject } from "../data/bioTypes";
 import type { ResumeContact } from "../data/contact";
+import { PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN } from "./pageFitHeightPrefs";
 import { ResumeTemplate } from "../ResumeTemplate";
 
 type FitConfig = {
@@ -68,9 +69,6 @@ function inchToPx(inches: number): number {
   return inches * pxPerInch;
 }
 
-/** Extra pixels beyond nominal 10in (Letter @ 0.5in @page) so the fitter trims less aggressively and uses more of the sheet (less empty space at the bottom when content is short of the real print box). */
-const PAGE_FIT_HEIGHT_ALLOWANCE_PX = 36;
-
 function maxBulletCount(
   items: Array<{ bullets?: string[] }>,
   cap: number,
@@ -85,18 +83,21 @@ export function ResumeFitter({
   bank,
   contact,
   target,
+  pageFitExtraHeightPx,
   onFit,
 }: {
   bank: BioBank;
   contact: ResumeContact;
   target: "screen" | "print";
+  /** Added to nominal Letter content height; higher keeps more lines before trimming. */
+  pageFitExtraHeightPx: number;
   onFit?: (info: { cfg: FitConfig; fittedBank: BioBank }) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const onFitRef = useRef<typeof onFit>(onFit);
   const cfgRef = useRef<FitConfig | null>(null);
   const baseCfgRef = useRef<FitConfig | null>(null);
-  const bankKeyRef = useRef<string>("");
+  const fitLoopKeyRef = useRef<string>("");
   const tighteningRef = useRef<boolean>(false);
   const baseCfg = useMemo<FitConfig>(() => {
     // Start "as full as possible", then tighten until it fits.
@@ -128,18 +129,18 @@ export function ResumeFitter({
     const el = containerRef.current;
     if (!el) return;
 
-    // US Letter with @page margin 0.5in → 10in nominal content height (resumeCssPrint).
-    // scrollHeight on `.rt` already includes its padding. A small positive allowance uses a bit
-    // more vertical room before trimming so the preview is not overly conservative vs print.
-    const maxHeightPx = inchToPx(10) + PAGE_FIT_HEIGHT_ALLOWANCE_PX;
+    // Nominal US Letter content height (@page 0.5in margins → see resumeCssPrint).
+    // scrollHeight on `.rt` already includes its padding. `pageFitExtraHeightPx` is user-controlled.
+    const maxHeightPx = inchToPx(PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN) + pageFitExtraHeightPx;
 
     const rtEl = el.querySelector<HTMLElement>(".rt");
     if (!rtEl) return;
     const rt = rtEl;
 
     const bankKey = `${bank.experiences.map((e) => e.id).join("|")}::${bank.projects.map((p) => p.id).join("|")}`;
-    if (bankKeyRef.current !== bankKey) {
-      bankKeyRef.current = bankKey;
+    const fitLoopKey = `${bankKey}#${pageFitExtraHeightPx}`;
+    if (fitLoopKeyRef.current !== fitLoopKey) {
+      fitLoopKeyRef.current = fitLoopKey;
       baseCfgRef.current = baseCfg;
       const raf = window.requestAnimationFrame(() => setCfg(baseCfg));
       return () => window.cancelAnimationFrame(raf);
@@ -171,7 +172,7 @@ export function ResumeFitter({
     const ro = new ResizeObserver(() => checkAndTighten());
     ro.observe(rt);
     return () => ro.disconnect();
-  }, [bank, cfg, target]);
+  }, [bank, cfg, target, pageFitExtraHeightPx, baseCfg]);
 
   return (
     <div ref={containerRef}>

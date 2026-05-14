@@ -1,9 +1,18 @@
 import { ResumeFitter } from "../fit/ResumeFitter";
+import {
+  PAGE_FIT_EXTRA_HEIGHT_DEFAULT,
+  PAGE_FIT_EXTRA_HEIGHT_MAX,
+  PAGE_FIT_EXTRA_HEIGHT_MIN,
+  PAGE_FIT_EXTRA_HEIGHT_STORAGE_KEY,
+  clampPageFitExtraHeightPx,
+} from "../fit/pageFitHeightPrefs";
 import { useResumeData } from "../hooks/useResumeData";
+import { useLocalStorageNumberState } from "../../hooks/useLocalStorageNumberState";
 import { ResumeScope } from "../ui/ResumeScope";
 import { ResumeCanvas, ResumeError, ResumeToolbar } from "../ui/ResumeShell";
+import { PageFitHeightSlider } from "../ui/PageFitHeightSlider";
 import { ContactEditor } from "../ui/ContactEditor";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import type { BioBank } from "../data/bioTypes";
 import { ResumeTemplate } from "../ResumeTemplate";
 import { loadTailorPatch } from "../../tailor/tailorStorage";
@@ -23,6 +32,18 @@ export function ResumePreview({
     useResumeData();
   const [showContact, setShowContact] = useState<boolean>(false);
   const [fitEnabled, setFitEnabled] = useState<boolean>(true);
+  const [pageFitExtraHeightPx, setPageFitExtraHeightPx] = useLocalStorageNumberState(
+    PAGE_FIT_EXTRA_HEIGHT_STORAGE_KEY,
+    PAGE_FIT_EXTRA_HEIGHT_DEFAULT,
+    { min: PAGE_FIT_EXTRA_HEIGHT_MIN, max: PAGE_FIT_EXTRA_HEIGHT_MAX },
+  );
+  const pageFitSliderId = useId();
+
+  useEffect(() => {
+    const c = clampPageFitExtraHeightPx(pageFitExtraHeightPx);
+    if (c !== pageFitExtraHeightPx) setPageFitExtraHeightPx(c);
+  }, [pageFitExtraHeightPx, setPageFitExtraHeightPx]);
+
   const [fitInfo, setFitInfo] = useState<{
     cfg: {
       expLimit: number;
@@ -58,6 +79,7 @@ export function ResumePreview({
         bank={effectiveBank}
         contact={contact}
         target={mode === "print" ? "print" : "screen"}
+        pageFitExtraHeightPx={pageFitExtraHeightPx}
         onFit={handleFit}
       />
     );
@@ -164,6 +186,11 @@ export function ResumePreview({
         {showContact ? (
           <ContactEditor value={contact} onChange={setContact} />
         ) : null}
+        <PageFitHeightSlider
+          id={pageFitSliderId}
+          value={pageFitExtraHeightPx}
+          onChange={(n) => setPageFitExtraHeightPx(clampPageFitExtraHeightPx(n))}
+        />
         {trimSummary && fitEnabled ? (
           <div className="mt-2 mx-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-2 text-xs text-[var(--text)]">
             Fit summary: expLimit {trimSummary.cfg.expLimit}, projLimit{" "}

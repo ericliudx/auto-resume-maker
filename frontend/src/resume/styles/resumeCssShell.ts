@@ -81,5 +81,66 @@ export const RESUME_CSS_SHELL = `
   color: var(--text);
   margin-bottom: 8px;
 }
+
+.resumeScope .resumePane__fitHeight {
+  margin: 10px 2px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  max-width: 420px;
+}
+
+.resumeScope .resumePane__fitHeightHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.resumeScope .resumePane__fitHeightLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.resumeScope .resumePane__fitHeightValue {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.resumeScope .resumePane__fitHeightUnit {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.resumeScope .resumePane__fitHeightRange {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  accent-color: var(--text-h);
+}
+
+.resumeScope .resumePane__fitHeightRange:disabled {
+  opacity: 0.45;
+}
+
+.resumeScope .resumePane__fitHeightEnds {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.resumeScope .resumePane__fitHeightHint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text);
+}
 `
 
