@@ -68,6 +68,9 @@ function inchToPx(inches: number): number {
   return inches * pxPerInch;
 }
 
+/** Extra pixels beyond nominal 10in (Letter @ 0.5in @page) so the fitter trims less aggressively and uses more of the sheet (less empty space at the bottom when content is short of the real print box). */
+const PAGE_FIT_HEIGHT_ALLOWANCE_PX = 36;
+
 function maxBulletCount(
   items: Array<{ bullets?: string[] }>,
   cap: number,
@@ -76,11 +79,6 @@ function maxBulletCount(
   for (const it of items)
     m = Math.max(m, Array.isArray(it.bullets) ? it.bullets.length : 0);
   return clampInt(m || 1, 1, cap);
-}
-
-function pxFromCssLength(v: string): number {
-  const n = Number.parseFloat(v);
-  return Number.isFinite(n) ? n : 0;
 }
 
 export function ResumeFitter({
@@ -130,19 +128,14 @@ export function ResumeFitter({
     const el = containerRef.current;
     if (!el) return;
 
-    // Assume US Letter with 0.5" margins for printing. We measure the rendered `.rt`
-    // and keep it under the printable content box height (10").
+    // US Letter with @page margin 0.5in → 10in nominal content height (resumeCssPrint).
+    // scrollHeight on `.rt` already includes its padding. A small positive allowance uses a bit
+    // more vertical room before trimming so the preview is not overly conservative vs print.
+    const maxHeightPx = inchToPx(10) + PAGE_FIT_HEIGHT_ALLOWANCE_PX;
+
     const rtEl = el.querySelector<HTMLElement>(".rt");
     if (!rtEl) return;
     const rt = rtEl;
-
-    // Important: the printable area is 10" tall (11" letter minus 0.5" top/bottom margins),
-    // but `.rt` has its own padding (and print padding differs from screen). If we don't
-    // subtract that padding, the fitter can think it "fits" while the bottom is clipped.
-    const style = window.getComputedStyle(rt);
-    const padTop = pxFromCssLength(style.paddingTop);
-    const padBottom = pxFromCssLength(style.paddingBottom);
-    const maxHeightPx = inchToPx(10) - (padTop + padBottom);
 
     const bankKey = `${bank.experiences.map((e) => e.id).join("|")}::${bank.projects.map((p) => p.id).join("|")}`;
     if (bankKeyRef.current !== bankKey) {
