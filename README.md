@@ -53,7 +53,7 @@ The **resume fitter** (`ResumeFitter` in the frontend) keeps the rendered resume
 
 - It starts from the **fullest** layout: all experiences and projects from the current bank, with bullet caps derived from your data (up to six per item).
 
-- If the content is **too tall**, it tightens in a fixed order: fewer **project** bullets, then fewer **projects**, then fewer **experience** bullets, then fewer **experiences**. Header and skills are not auto-trimmed by this loop; only experience and project sections shrink.
+- If the content is **too tall**, it tightens in a fixed order: **one project bullet at a time** in a **bottom-to-top round robin** among visible projects (e.g. three projects at 3 bullets each go 3-3-3 → 3-3-2 → 3-2-2 → 2-2-2 → 2-2-1 → 2-1-1 → 1-1-1), then fewer **projects** (but not below **three** whole projects when the bank has at least three), then fewer **experience** bullets, then fewer **experiences**. Header and skills are not auto-trimmed by this loop; only experience and project sections shrink.
 
 - It uses a `ResizeObserver` so layout changes (for example after tailoring) re-run the check. Measurements use **unscaled** DOM height so the on-screen preview zoom does not skew fit decisions versus print.
 
