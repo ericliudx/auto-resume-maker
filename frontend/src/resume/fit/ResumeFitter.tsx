@@ -32,6 +32,9 @@ export function ResumeFitter({
   const tighteningRef = useRef<boolean>(false);
   const baseCfg = useMemo<FitConfig>(() => buildInitialFitConfig(bank), [bank]);
 
+  const pageFitExtraRef = useRef(pageFitExtraHeightPx);
+  pageFitExtraRef.current = pageFitExtraHeightPx;
+
   const [cfg, setCfg] = useState<FitConfig>(() => buildInitialFitConfig(bank));
 
   const fittedBank = useMemo(() => applyFit(bank, cfg), [bank, cfg]);
@@ -53,8 +56,8 @@ export function ResumeFitter({
     if (!el) return;
 
     // Nominal US Letter content height (@page 0.5in margins → see resumeCssPrint).
-    // scrollHeight on `.rt` already includes its padding. `pageFitExtraHeightPx` is user-controlled.
-    const maxHeightPx = inchToPx(PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN) + pageFitExtraHeightPx;
+    // scrollHeight on `.rt` already includes its padding. `pageFitExtraHeightPx` is user-controlled
+    // (read via `pageFitExtraRef` inside `checkAndTighten` so ResizeObserver always sees the latest slider).
 
     const rtEl = el.querySelector<HTMLElement>(".rt");
     if (!rtEl) return;
@@ -87,6 +90,8 @@ export function ResumeFitter({
           // change fit decisions vs print.
           const h = rt.scrollHeight;
           const cur = cfgRef.current ?? cfg;
+          const maxHeightPx =
+            inchToPx(PAGE_FIT_NOMINAL_CONTENT_HEIGHT_IN) + pageFitExtraRef.current;
           if (h <= maxHeightPx) return;
           const base = baseCfgRef.current ?? baseCfg;
           const next = nextTighterConfig(cur, base, bank);

@@ -49,7 +49,7 @@ The model returns a **tailor plan** (JSON); the app validates it and applies it 
 
 ## Resume fitter
 
-The **resume fitter** (`ResumeFitter` in the frontend) keeps the rendered resume sheet within the printable height for US Letter with half-inch margins (it measures the `.rt` root and compares its `scrollHeight` to the **10-inch** nominal content box from `@page` in print CSS, plus a user-adjustable **pixel offset** stored in `localStorage` and controlled by a slider in the resume preview toolbar).
+The **resume fitter** (`ResumeFitter` in the frontend) keeps the rendered resume sheet within the printable height for US Letter with half-inch margins (it measures the `.rt` root and compares its `scrollHeight` to the **10-inch** nominal content box from `@page` in print CSS, plus a user-adjustable **pixel offset** stored in `localStorage` and controlled by a slider in the resume preview toolbar; the default offset is **+112px** so trimming matches typical PDF output more closely out of the box).
 
 - It starts from the **fullest** layout: all experiences and projects from the current bank, with bullet caps derived from your data (up to six per item).
 
