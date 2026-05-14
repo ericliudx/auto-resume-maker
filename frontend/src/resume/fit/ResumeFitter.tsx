@@ -7,9 +7,15 @@ import { ResumeTemplate } from "../ResumeTemplate";
 export type FitConfig = {
   expLimit: number;
   projLimit: number;
-  expBullets: number;
+  /** Bullet caps per `bank.experiences` index; only indices `< expLimit` are shown. */
+  experienceBulletCounts: number[];
   /** Bullet caps per `bank.projects` index; only indices `< projLimit` are shown. */
   projectBulletCounts: number[];
+  /**
+   * Round-robin phase for experience bullet trims (bottom → … → top, repeat).
+   * Cycle position `p` maps to experience index `expLimit - 1 - p`.
+   */
+  experienceTrimCursor: number;
   /**
    * Round-robin phase for project bullet trims (bottom → … → top, repeat).
    * Cycle position `p` maps to project index `projLimit - 1 - p`.
@@ -39,6 +45,39 @@ function maxBulletsForItem(
 
 function initialProjectBulletCounts(bank: BioBank): number[] {
   return bank.projects.map((p) => maxBulletsForItem(p, 6));
+}
+
+function initialExperienceBulletCounts(bank: BioBank): number[] {
+  return bank.experiences.map((e) => maxBulletsForItem(e, 6));
+}
+
+/**
+ * Remove one experience bullet using bottom→top round-robin (e.g. 3-3 → 3-2 → 2-2 → …).
+ */
+function trimOneExperienceBulletRoundRobin(
+  cfg: FitConfig,
+  bank: BioBank,
+): FitConfig | null {
+  const L = clampInt(cfg.expLimit, 0, bank.experiences.length);
+  if (L === 0) return null;
+
+  const cursor = ((cfg.experienceTrimCursor % L) + L) % L;
+
+  for (let step = 0; step < L; step++) {
+    const pos = (cursor + step) % L;
+    const idx = L - 1 - pos;
+    if (cfg.experienceBulletCounts[idx] > 1) {
+      const nextCounts = cfg.experienceBulletCounts.slice();
+      nextCounts[idx] -= 1;
+      const nextCursor = (cursor + step + 1) % L;
+      return {
+        ...cfg,
+        experienceBulletCounts: nextCounts,
+        experienceTrimCursor: nextCursor,
+      };
+    }
+  }
+  return null;
 }
 
 /**
@@ -78,7 +117,7 @@ function nextTighterConfig(
 ): FitConfig | null {
   // Tighten in a deterministic order:
   // 1) one project bullet, round-robin bottom→top → 2) project count (not below 3 when possible) →
-  // 3) experience bullets → 4) experience count.
+  // 3) one experience bullet, round-robin bottom→top → 4) experience count.
   // NOTE: header + skills are treated as fixed; we only tighten experiences/projects.
   const projBullet = trimOneProjectBulletRoundRobin(cfg, bank);
   if (projBullet) return projBullet;
@@ -90,9 +129,15 @@ function nextTighterConfig(
       projectBulletCounts: base.projectBulletCounts.slice(),
       projectTrimCursor: 0,
     };
-  if (cfg.expBullets > 1) return { ...cfg, expBullets: cfg.expBullets - 1 };
+  const expBullet = trimOneExperienceBulletRoundRobin(cfg, bank);
+  if (expBullet) return expBullet;
   if (cfg.expLimit > 1)
-    return { ...cfg, expLimit: cfg.expLimit - 1, expBullets: base.expBullets };
+    return {
+      ...cfg,
+      expLimit: cfg.expLimit - 1,
+      experienceBulletCounts: base.experienceBulletCounts.slice(),
+      experienceTrimCursor: 0,
+    };
   return null;
 }
 
@@ -102,10 +147,13 @@ function applyFit(bank: BioBank, cfg: FitConfig): BioBank {
 
   const experiences: BioExperience[] = bank.experiences
     .slice(0, expLimit)
-    .map((e) => ({
+    .map((e, idx) => ({
       ...e,
       bullets: Array.isArray(e.bullets)
-        ? e.bullets.slice(0, clampInt(cfg.expBullets, 1, 99))
+        ? e.bullets.slice(
+            0,
+            clampInt(cfg.experienceBulletCounts[idx] ?? 1, 1, 99),
+          )
         : e.bullets,
     }));
 
@@ -137,16 +185,6 @@ function inchToPx(inches: number): number {
   return inches * pxPerInch;
 }
 
-function maxBulletCount(
-  items: Array<{ bullets?: string[] }>,
-  cap: number,
-): number {
-  let m = 0;
-  for (const it of items)
-    m = Math.max(m, Array.isArray(it.bullets) ? it.bullets.length : 0);
-  return clampInt(m || 1, 1, cap);
-}
-
 export function ResumeFitter({
   bank,
   contact,
@@ -172,8 +210,9 @@ export function ResumeFitter({
     return {
       expLimit: bank.experiences.length,
       projLimit: bank.projects.length,
-      expBullets: maxBulletCount(bank.experiences, 6),
+      experienceBulletCounts: initialExperienceBulletCounts(bank),
       projectBulletCounts: initialProjectBulletCounts(bank),
+      experienceTrimCursor: 0,
       projectTrimCursor: 0,
     };
   }, [bank]);

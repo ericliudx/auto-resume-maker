@@ -86,12 +86,15 @@ export function ResumePreview({
       0,
       effectiveBank.projects.length - fittedBank.projects.length,
     );
-    const expBulletsDropped =
-      effectiveBank.experiences.reduce(
-        (n, e) => n + (e.bullets?.length ?? 0),
-        0,
-      ) -
-      fittedBank.experiences.reduce((n, e) => n + (e.bullets?.length ?? 0), 0);
+    let expBulletsDropped = 0;
+    for (let i = 0; i < effectiveBank.experiences.length; i++) {
+      const o = effectiveBank.experiences[i]?.bullets?.length ?? 0;
+      const f =
+        i < fittedBank.experiences.length
+          ? (fittedBank.experiences[i]?.bullets?.length ?? 0)
+          : 0;
+      expBulletsDropped += Math.max(0, o - f);
+    }
     let projBulletsDropped = 0;
     for (let i = 0; i < effectiveBank.projects.length; i++) {
       const o = effectiveBank.projects[i]?.bullets?.length ?? 0;
@@ -187,8 +190,11 @@ export function ResumePreview({
         {trimSummary && fitEnabled ? (
           <div className="mt-2 mx-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] p-2 text-xs text-[var(--text)]">
             Fit summary: expLimit {trimSummary.cfg.expLimit}, projLimit{" "}
-            {trimSummary.cfg.projLimit}, expBullets {trimSummary.cfg.expBullets}
-            , project caps [
+            {trimSummary.cfg.projLimit}, experience caps [
+            {trimSummary.cfg.experienceBulletCounts
+              .slice(0, trimSummary.cfg.expLimit)
+              .join(", ")}
+            ], project caps [
             {trimSummary.cfg.projectBulletCounts
               .slice(0, trimSummary.cfg.projLimit)
               .join(", ")}
