@@ -13,6 +13,7 @@ import { generateDeterministicTailorPatch } from '../tailor/deterministicTailor'
 import type { TailorPlan, TailorPlanV2 } from '../tailor/planTypes'
 import { parseLlmTailorResponseText } from '../tailor/llmTailorResponse'
 import { capRelevantCoursesList } from '../tailor/relevantCoursesCap'
+import { buildTailorApplyDebug } from '../tailor/tailorDebugSummary'
 
 export type TailorPlanAppliedArgs = {
   role: AtsRole
@@ -145,19 +146,20 @@ export function useLlmTools(options?: {
           keywordLimit: parsedPlan.plan.atsKeywordLimit,
           jobPostingText: jobText,
         })
-        setLlmOutput(
-          [
-            'Tailor applied (derived view; bio bank unchanged).',
-            `Base: ${bankFingerprint(bank)}`,
-            `Tailored: ${bankFingerprint(next)}`,
-            `Print/PDF title (saved): ${merged.pdfFileName ?? '(none)'}`,
-            `Selected experienceIds: ${(merged.experienceIds ?? []).join(', ') || '(none)'}`,
-            `Selected projectIds: ${(merged.projectIds ?? []).join(', ') || '(none)'}`,
-            parsedPlan.plan.gapsText ? `---\nBIGGEST_GAPS:\n${parsedPlan.plan.gapsText}` : '',
-          ]
-            .filter(Boolean)
-            .join('\n'),
-        )
+        const outputChunks = [
+          'Tailor applied (derived view; bio bank unchanged).',
+          `Base: ${bankFingerprint(bank)}`,
+          `Tailored: ${bankFingerprint(next)}`,
+          `Print/PDF title (saved): ${merged.pdfFileName ?? '(none)'}`,
+          `Selected experienceIds: ${(merged.experienceIds ?? []).join(', ') || '(none)'}`,
+          `Selected projectIds: ${(merged.projectIds ?? []).join(', ') || '(none)'}`,
+          '',
+          buildTailorApplyDebug(bank, merged),
+        ]
+        if (parsedPlan.plan.gapsText) {
+          outputChunks.push('---', `BIGGEST_GAPS:\n${parsedPlan.plan.gapsText}`)
+        }
+        setLlmOutput(outputChunks.join('\n'))
       } catch (e: unknown) {
         if (stale()) return
         const msg = e instanceof Error ? e.message : 'Tailor request failed.'
@@ -194,6 +196,8 @@ export function useLlmTools(options?: {
           `Tailored: ${bankFingerprint(next)}`,
           `Selected experienceIds: ${(patch.experienceIds ?? []).join(', ') || '(none)'}`,
           `Selected projectIds: ${(patch.projectIds ?? []).join(', ') || '(none)'}`,
+          '',
+          buildTailorApplyDebug(bank, patch),
         ].join('\n'),
       )
     } catch (e: unknown) {
