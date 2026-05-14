@@ -17,14 +17,14 @@ Set `GROQ_API_KEY` in the environment (Vite loads it for the dev server). Option
 
 Human-edited source material lives under **`bio/`**. The dev server aggregates JSON from these subfolders into a single **bank** (`GET /api/bio/bank`). **Contact** is separate: **`bio/contact.json`** is served by `GET /api/bio/contact` and is not merged into the bank payload.
 
-| Subfolder | Purpose | Typical JSON files |
-|-----------|---------|---------------------|
-| `experiences/` | Employment-style roles | One `.json` per role (for example `quant-dev-lab-cognitive-research.json`) |
-| `projects/` | Standalone projects | One `.json` per project |
-| `education/` | Degrees, programs, course bank | For example `education_list.json`, `relevant-courses.json` |
-| `skills/` | Skill groups / tooling | For example `skills_list.json` (you can split into multiple JSON files) |
-| `summaries/` | Summary or headline variants | One or more `.json` files |
-| `certifications/` | Licenses and certs | One `.json` per item or grouped files |
+| Subfolder         | Purpose                        | Typical JSON files                                                         |
+| ----------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| `experiences/`    | Employment-style roles         | One `.json` per role (for example `quant-dev-lab-cognitive-research.json`) |
+| `projects/`       | Standalone projects            | One `.json` per project                                                    |
+| `education/`      | Degrees, programs, course bank | For example `education_list.json`, `relevant-courses.json`                 |
+| `skills/`         | Skill groups / tooling         | For example `skills_list.json` (you can split into multiple JSON files)    |
+| `summaries/`      | Summary or headline variants   | One or more `.json` files                                                  |
+| `certifications/` | Licenses and certs             | One `.json` per item or grouped files                                      |
 
 Anything outside those paths (for example `bio/existing-stuff/`) is for your own reference and is **not** read by the app APIs.
 
@@ -37,7 +37,6 @@ When you run **Tailor**, the app builds one **user** message and a short **syste
 1. **System message** (fixed in code) tells the model to follow the user message, emit valid JSON first (including `pdfFileName`), then the `BIGGEST_GAPS` section, with no markdown around the JSON.
 
 2. **User message** is assembled in order by `buildTailorPrompt` in the frontend:
-
    - **General tailor instructions** — the full text from [`.specify/general-tailor-llm-prompt.txt`](.specify/general-tailor-llm-prompt.txt) (bundled at build time). This defines ground rules (no fabrication, stable template, which bio paths matter, JSON shape expectations, and so on).
 
    - **Aggregated bank JSON** — a single JSON object derived from the on-disk bank: trimmed `experiences` and `projects` (ids and resume-facing fields), full `education` and `skills`, plus `summaries` and `certifications` when present. The model is instructed to use only facts that appear there.
@@ -58,4 +57,4 @@ The **resume fitter** (`ResumeFitter` in the frontend) keeps the rendered resume
 
 - It uses a `ResizeObserver` so layout changes (for example after tailoring) re-run the check. Measurements use **unscaled** DOM height so the on-screen preview zoom does not skew fit decisions versus print.
 
-The fitted slice of the bank is what you see when the fitter is active in the resume preview pipeline; tailoring changes *what* is in the bank, while the fitter changes *how much* of that bank fits on one page.
+The fitted slice of the bank is what you see when the fitter is active in the resume preview pipeline; tailoring changes _what_ is in the bank, while the fitter changes _how much_ of that bank fits on one page.

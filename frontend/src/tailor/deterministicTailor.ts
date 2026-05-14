@@ -4,9 +4,7 @@ import type { TailorModelResult } from './tailorTypes'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
 import { capRelevantCoursesList } from './relevantCoursesCap'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
-
-/** Max items to auto-pick for simple (non-V2) plans; avoids forcing exactly 3 while staying bounded. */
-const SIMPLE_PLAN_SELECTION_CAP = 12
+import { MAX_TAILOR_EXPERIENCES, MAX_TAILOR_PROJECTS } from './tailorSelectionCap'
 
 function norm(s: string): string {
   return s.toLowerCase()
@@ -107,14 +105,14 @@ export function generateDeterministicTailorPatch(args: {
     ids: args.bank.experiences.map((e) => e.id),
     scores: expScores,
     mustInclude: args.plan.mustIncludeExperienceIds,
-    limit: Math.min(Math.max(args.bank.experiences.length, 1), SIMPLE_PLAN_SELECTION_CAP),
+    limit: Math.min(Math.max(args.bank.experiences.length, 1), MAX_TAILOR_EXPERIENCES),
   })
 
   const projectIds = pickTopIds({
     ids: args.bank.projects.map((p) => p.id),
     scores: projScores,
     mustInclude: args.plan.mustIncludeProjectIds,
-    limit: Math.min(Math.max(args.bank.projects.length, 1), SIMPLE_PLAN_SELECTION_CAP),
+    limit: Math.min(Math.max(args.bank.projects.length, 1), MAX_TAILOR_PROJECTS),
   })
 
   // Deterministic mode: selection + ordering only.

@@ -3,6 +3,7 @@ import type { TailorModelResult } from './tailorTypes'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
 import { capRelevantCoursesList } from './relevantCoursesCap'
 import { sanitizeResumeTypography } from './resumeTypography'
+import { MAX_TAILOR_EXPERIENCES, MAX_TAILOR_PROJECTS } from './tailorSelectionCap'
 
 function uniqueStrings(xs: unknown): string[] {
   if (!Array.isArray(xs)) return []
@@ -42,7 +43,6 @@ export function validateTailorResult(args: {
   if (badExp.length) return { ok: false, message: `Model used unknown experienceIds: ${badExp.join(', ')}` }
   if (badProj.length) return { ok: false, message: `Model used unknown projectIds: ${badProj.join(', ')}` }
 
-  const MAX_IDS = 12
   const { pdfFileName: pdfRaw, relevantCourses: rcIn, ...resultRest } = result
   const pdfSanitized = sanitizePdfFileNameForPlan(pdfRaw)
   if (mode === 'default' && !pdfSanitized) {
@@ -56,8 +56,8 @@ export function validateTailorResult(args: {
   const relevantCourses = capRelevantCoursesList(relevantCoursesRaw) ?? []
   const normalized: TailorModelResult = {
     ...resultRest,
-    experienceIds: expIds.slice(0, MAX_IDS),
-    projectIds: projIds.slice(0, MAX_IDS),
+    experienceIds: expIds.slice(0, MAX_TAILOR_EXPERIENCES),
+    projectIds: projIds.slice(0, MAX_TAILOR_PROJECTS),
     ...(pdfSanitized ? { pdfFileName: pdfSanitized } : {}),
     ...(relevantCourses.length ? { relevantCourses } : {}),
   }
