@@ -4,7 +4,11 @@ import type { TailorModelResult } from './tailorTypes'
 import type { TailorPlan, TailorPlanV2 } from './planTypes'
 import { capRelevantCoursesList } from './relevantCoursesCap'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
-import { MAX_TAILOR_EXPERIENCES, MAX_TAILOR_PROJECTS } from './tailorSelectionCap'
+import {
+  MAX_TAILOR_EXPERIENCES,
+  MAX_TAILOR_PROJECTS,
+} from './tailorSelectionCap'
+import { capExperiencePatchBullets, capProjectPatchBullets } from './tailorPatchBulletCaps'
 
 function norm(s: string): string {
   return s.toLowerCase()
@@ -78,8 +82,8 @@ export function generateDeterministicTailorPatch(args: {
     return {
       experienceIds: plan.experienceIds,
       projectIds: plan.projectIds,
-      experiences: (plan.experiencePatches ?? []).map((p) => ({ ...p })),
-      projects: (plan.projectPatches ?? []).map((p) => ({ ...p })),
+      experiences: capExperiencePatchBullets(plan.experiencePatches),
+      projects: capProjectPatchBullets(plan.projectPatches),
       skills: plan.skillsGroups ? { groups: plan.skillsGroups } : undefined,
       ...(pdfFileName ? { pdfFileName } : {}),
       ...(rc?.length ? { relevantCourses: rc } : {}),

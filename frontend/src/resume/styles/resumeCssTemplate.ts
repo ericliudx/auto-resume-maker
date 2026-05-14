@@ -6,7 +6,8 @@ export const RESUME_CSS_TEMPLATE = `
   width: 820px;
   max-width: 100%;
   margin: 0 auto;
-  padding: 26px 34px;
+  /* Match @media print .rt padding in resumeCssPrint.ts so fitter scrollHeight ≈ PDF. */
+  padding: 18px 28px;
   box-sizing: border-box;
   border-radius: 10px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);

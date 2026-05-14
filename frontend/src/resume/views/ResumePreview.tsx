@@ -7,6 +7,7 @@ import {
   clampPageFitExtraHeightPx,
 } from "../fit/pageFitHeightPrefs";
 import { useResumeData } from "../hooks/useResumeData";
+import { useLocalStorageBooleanState } from "../../hooks/useLocalStorageBooleanState";
 import { useLocalStorageNumberState } from "../../hooks/useLocalStorageNumberState";
 import { ResumeScope } from "../ui/ResumeScope";
 import { ResumeCanvas, ResumeError, ResumeToolbar } from "../ui/ResumeShell";
@@ -17,6 +18,8 @@ import type { BioBank } from "../data/bioTypes";
 import { ResumeTemplate } from "../ResumeTemplate";
 import { loadTailorPatch } from "../../tailor/tailorStorage";
 import { documentTitleForPrint } from "../printResumeTitle";
+
+const RESUME_FIT_ENABLED_STORAGE_KEY = "auto-resume.resumeFitEnabled.v1";
 
 /** Avoid duplicate `window.print()` under React StrictMode (dev) double-mount. */
 let resumePrintAutoLock = false;
@@ -31,7 +34,10 @@ export function ResumePreview({
   const { bank, contact, setContact, error, loading, contactSynced } =
     useResumeData();
   const [showContact, setShowContact] = useState<boolean>(false);
-  const [fitEnabled, setFitEnabled] = useState<boolean>(true);
+  const [fitEnabled, setFitEnabled] = useLocalStorageBooleanState(
+    RESUME_FIT_ENABLED_STORAGE_KEY,
+    true,
+  );
   const [pageFitExtraHeightPx, setPageFitExtraHeightPx] = useLocalStorageNumberState(
     PAGE_FIT_EXTRA_HEIGHT_STORAGE_KEY,
     PAGE_FIT_EXTRA_HEIGHT_DEFAULT,
@@ -58,7 +64,7 @@ export function ResumePreview({
   const resume = (() => {
     const effectiveBank = bankOverride ?? bank;
     if (!effectiveBank) return null;
-    if (mode !== "print" && !fitEnabled) {
+    if (!fitEnabled) {
       return <ResumeTemplate bank={effectiveBank} contact={contact} />;
     }
     return (
@@ -164,8 +170,8 @@ export function ResumePreview({
             <button
               type="button"
               className="resumePane__button"
-              onClick={() => setFitEnabled((v) => !v)}
-              title="Toggle one-page fitting (app preview only)"
+              onClick={() => setFitEnabled(!fitEnabled)}
+              title="Toggle one-page fitting (saved; print/PDF uses the same setting)"
             >
               {fitEnabled ? "Fit: on" : "Fit: off"}
             </button>

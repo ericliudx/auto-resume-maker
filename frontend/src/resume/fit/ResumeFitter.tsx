@@ -98,7 +98,7 @@ export function ResumeFitter({
   }, [bank, cfg, target, pageFitExtraHeightPx, baseCfg]);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="resumeFitterCanvas">
       <ResumeTemplate bank={fittedBank} contact={contact} />
     </div>
   );

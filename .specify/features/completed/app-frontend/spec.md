@@ -19,7 +19,7 @@ So that future tailoring/page-fit features have an obvious place to plug in.
 - The viewer supports switching between:
   - **Resume**: the fitted 1-page-ish preview (default)
   - **Super-resume**: an untrimmed view listing **all** experiences and projects for manual verification
-- The resume preview is shown in an app-only “page view” that may be **visually scaled** for easier side-by-side viewing. Print/PDF output is not affected.
+- The resume preview uses the same layout scale as print/PDF (no separate “shrink to fit panel” transform). **Fit on/off** is persisted so the `?print=1` route matches the in-app preview.
 - The print/PDF route may show a short screen-only hint about disabling browser print headers/footers; it is not included in the PDF output.
 
 ### Paste job posting

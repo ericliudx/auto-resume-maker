@@ -1,4 +1,13 @@
 export const RESUME_CSS_SHELL = `
+/* Fixed sheet width for page-fit measurement: avoids narrow app canvas vs wide print tab reflow mismatch. */
+.resumeScope .resumeFitterCanvas {
+  width: 820px;
+  max-width: none;
+  flex-shrink: 0;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
 .resumeScope .resumePane {
   display: flex;
   flex-direction: column;

@@ -55,6 +55,6 @@ The **resume fitter** (`ResumeFitter` in the frontend) keeps the rendered resume
 
 - If the content is **too tall**, it tightens in a fixed order: **one project bullet at a time** in a **bottom-to-top round robin** among visible projects (e.g. three projects at 3 bullets each go 3-3-3 → 3-3-2 → 3-2-2 → 2-2-2 → 2-2-1 → 2-1-1 → 1-1-1), then fewer **projects** (but not below **three** whole projects when the bank has at least three), then **one experience bullet at a time** in the same bottom-to-top round robin among visible roles (e.g. 3-3 → 3-2 → 2-2 → 2-1 → 1-1), then fewer **experiences**. Header and skills are not auto-trimmed by this loop; only experience and project sections shrink.
 
-- It uses a `ResizeObserver` so layout changes (for example after tailoring) re-run the check. Measurements use **unscaled** DOM height so the on-screen preview zoom does not skew fit decisions versus print.
+- It uses a `ResizeObserver` so layout changes (for example after tailoring) re-run the check. **Fit on/off** and the height slider are stored in `localStorage`, so the `?print=1` tab uses the same fitting path as the app preview (no separate “print-only” trim).
 
 The fitted slice of the bank is what you see when the fitter is active in the resume preview pipeline; tailoring changes _what_ is in the bank, while the fitter changes _how much_ of that bank fits on one page.

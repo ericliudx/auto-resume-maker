@@ -137,8 +137,6 @@ function App() {
                 className={[
                   "min-h-0 min-w-0 flex-1 m-0 px-4 py-3.5 overflow-auto overflow-y-scroll [scrollbar-gutter:stable_both-edges]",
                   "bg-[var(--bg)] text-[var(--text-h)] font-sans text-[13px] leading-[1.35]",
-                  // App-only "page view" scale: scale the sheet, not the toolbar/canvas chrome.
-                  "[&_.rt]:origin-top [&_.rt]:transform [&_.rt]:scale-[0.88]",
                   resumeView === "bio" ? "hidden" : "",
                 ].join(" ")}
               >

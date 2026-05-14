@@ -3,7 +3,11 @@ import type { TailorModelResult } from './tailorTypes'
 import { sanitizePdfFileNameForPlan } from './pdfFileName'
 import { capRelevantCoursesList } from './relevantCoursesCap'
 import { sanitizeResumeTypography } from './resumeTypography'
-import { MAX_TAILOR_EXPERIENCES, MAX_TAILOR_PROJECTS } from './tailorSelectionCap'
+import {
+  MAX_TAILOR_EXPERIENCES,
+  MAX_TAILOR_PROJECTS,
+} from './tailorSelectionCap'
+import { capExperiencePatchBullets, capProjectPatchBullets } from './tailorPatchBulletCaps'
 
 function uniqueStrings(xs: unknown): string[] {
   if (!Array.isArray(xs)) return []
@@ -58,6 +62,8 @@ export function validateTailorResult(args: {
     ...resultRest,
     experienceIds: expIds.slice(0, MAX_TAILOR_EXPERIENCES),
     projectIds: projIds.slice(0, MAX_TAILOR_PROJECTS),
+    experiences: capExperiencePatchBullets(resultRest.experiences),
+    projects: capProjectPatchBullets(resultRest.projects),
     ...(pdfSanitized ? { pdfFileName: pdfSanitized } : {}),
     ...(relevantCourses.length ? { relevantCourses } : {}),
   }
